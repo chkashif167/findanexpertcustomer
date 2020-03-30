@@ -1,0 +1,62 @@
+{
+  "name": "Selteq.Web",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@aspnet/signalr": "^1.1.4",
+    "@date-io/date-fns": "^1.3.11",
+    "@material-ui/pickers": "^3.2.6",
+    "@progress/kendo-dropdowns-react-wrapper": "^2018.3.1017",
+    "@progress/kendo-react-buttons": "^3.4.0",
+    "@progress/kendo-react-conversational-ui": "^3.4.0",
+    "@progress/kendo-react-inputs": "^3.4.0",
+    "@progress/kendo-react-intl": "^3.4.0",
+    "@progress/kendo-theme-material": "^3.2.0",
+    "@syncfusion/ej2-react-buttons": "^17.1.47",
+    "@syncfusion/ej2-react-dropdowns": "^17.3.19",
+    "axios": "^0.19.1",
+    "bootstrap": "^3.3.7",
+    "braintree-web-drop-in-react": "0.2.10",
+    "date-fns": "^2.0.0-beta.5",
+    "jquery": "^3.4.0",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.23",
+    "multiselect-react-dropdown": "^1.2.4",
+    "rc-time-picker": "^3.7.3",
+    "react": "^16.10.2",
+    "react-autosuggest": "^9.4.3",
+    "react-bootstrap": "^0.31.5",
+    "react-coverflow": "^0.2.20",
+    "react-date-picker-cs": "^0.1.28",
+    "react-dom": "^16.9.0",
+    "react-gradient-timepicker": "0.0.3",
+    "react-infinite-scroll-component": "^4.5.3",
+    "react-modern-datepicker": "^0.7.1",
+    "react-moment": "^0.9.1",
+    "react-multi-carousel": "^2.4.0",
+    "react-multiselect-checkboxes": "^0.1.1",
+    "react-router-bootstrap": "^0.24.4",
+    "react-router-dom": "^4.2.2",
+    "react-scripts": "^2.0.0",
+    "react-stripe-elements": "^5.0.1",
+    "react-timekeeper": "^1.1.0",
+    "rimraf": "^2.6.2",
+    "toastr": "^2.1.4",
+    "twilio-chat": "^3.3.1"
+  },
+  "scripts": {
+    "start": "rimraf ./build && react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "devDependencies": {
+    "compression-webpack-plugin": "^3.0.1"
+  }
+}

@@ -1,0 +1,3 @@
+@using Selteq.Web
+@namespace Selteq.Web.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

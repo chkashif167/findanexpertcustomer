@@ -1,0 +1,426 @@
+﻿import React, { Component } from 'react';
+import { CheckLogin } from '../CheckLogin';
+import App from '../../App';
+import { Link } from 'react-router-dom';
+
+var iconstyle = {
+    width: '20px',
+    height: '20px'
+}
+
+export class NavMenu extends Component {
+    displayName = NavMenu.name
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            allServices: [], found: false
+        };
+
+        this.handleChangeSearch = this.handleChangeSearch.bind(this);
+    }
+
+    handleChangeSearch(e) {
+
+        this.setState({ search: e.target.value });
+
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                SearchService: e.target.value
+            })
+        };
+
+        fetch(App.ApisBaseUrlV2 + '/api/ServiceType/findservicetypev2', requestOptions)
+            .then(response => {
+                return response.json();
+            })
+            .then(response => {
+                console.log(response);
+                if (response.statuscode == 200) {
+                    this.setState({ allServices: response.searchedlist, found: true });
+                }
+                else {
+                    this.setState({ found: false });
+                }
+            });
+    }
+    
+
+    render() {
+
+        var Styles = {
+            visibility: 'hidden'
+        }
+
+        if (localStorage.getItem("serviceproviderid") != null) {
+
+            var providerLink = (<Link className="nav-link text-white fs-14" to="https://pro.findanexpert.net/" target="_blank">Become An Expert</Link>);
+            var profileLink = (<li className="col-md-2 nav-item" id="userName">
+                <Link className="nav-link text-white" to="/provider-profile">Hello, <span className="text-uppercase font-weight-bold">{localStorage.getItem("firstname")}</span></Link>
+            </li>);
+            
+        }
+        else {
+
+            var providerLink = (<Link className="nav-link text-white fs-14" to="https://pro.findanexpert.net/" target="_blank"><strong>Become an Expert</strong></Link>);
+            var profileLink = (<li className="col-md-2 nav-item" id="userName">
+                <Link className="nav-link text-white" to="#"><strong>Hello, <span style={Styles}>Raheem</span></strong></Link>
+            </li>);
+        }
+
+        if (localStorage.getItem("customeraccesstoken") != null) {
+
+            var customerLink = (<Link className="nav-link text-white fs-14" to="/referral">Referral</Link>);
+            var profileLink = (<li className="col-md-2 nav-item" id="userName">
+                <Link className="nav-link text-white" to="/profile">Hello, <span className="text-uppercase font-weight-bold">{localStorage.getItem("firstname")}</span></Link>
+            </li>);
+            var topRightLink = (<li className="col-md-2 nav-item no-mobile location afterLogin text-right">
+                <a className="nav-link text-white pl-0 pr-2" href="#">
+                    <span className="nav-location-icon nav-location-icon mr-2 float-right">
+                        <i className="fas fa-map-marker d-flex"></i>
+                    </span>
+                    <div className="nav-left-block pr-3">
+                        <span className="nav-line-1">Service to</span>
+                        <span className="nav-line-2">London</span>
+                    </div>
+                </a>
+            </li>);
+            var watchList = (<Link className="nav-link text-white fs-14" to="/watchlist">Watchlist</Link>);
+
+
+            var customerProfileLinks = (<ul className="navbar-nav mr-auto" id="leftMenu">
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/profile">
+                        <img src={App.StaticImagesUrl + 'profile.png'} className="f_top_hamberger_icon" /><strong>Your Profile</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/customer-bookings">
+                        <img src={App.StaticImagesUrl + 'watchlist.png'} className="f_top_hamberger_icon" /><strong>Your Bookings</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/your-experts">
+                        <img src={App.StaticImagesUrl + 'expert.png'} className="f_top_hamberger_icon" /><strong>Your Experts</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/your-addresses">
+                        <img src={App.StaticImagesUrl + 'address.png'} className="f_top_hamberger_icon" /><strong>Your Addresses</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/your-emails">
+                        <img src={App.StaticImagesUrl + 'email.png'} className="f_top_hamberger_icon" /><strong>Your Emails</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/your-payment-details">
+                        <img src={App.StaticImagesUrl + 'payment.png'} className="f_top_hamberger_icon" /><strong>Payment Details</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/watchlist">
+                        <img src={App.StaticImagesUrl + 'watchlist.png'} className="f_top_hamberger_icon" /><strong>Watchlist</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="" data-toggle="modal" data-target="#logoutModal">
+                        <img src={App.StaticImagesUrl + 'logout.png'} className="f_top_hamberger_icon" /><strong>Signout</strong>
+                    </Link>
+                </li>
+            </ul>);
+
+        }
+        else if (localStorage.getItem("serviceproviderid") == null && localStorage.getItem("customeraccesstoken") == null) {
+
+            var customerLink = (<Link className="nav-link text-white fs-14" to="/customer-authentication"><strong>Referral</strong></Link>);
+            var topRightLink = (<div className="col-md-2 text-right"><li className="nav-item no-mobile location">
+                <a className="nav-link text-white" href="/customer-authentication" id="signin" onClick={this.signInSignUpClicked}>Sign In</a>
+            </li>
+                <li className="nav-item no-mobile location last">
+                    <a className="nav-link text-white" href="/customer-authentication" id="signup" onClick={this.signInSignUpClicked}>Sign Up</a>
+                </li>
+            </div>);
+            var watchList = (<Link className="nav-link text-white fs-14" to="/customer-authentication"><strong>Watchlist</strong></Link>);
+        }
+        else {
+
+            var topRightLink = (<li className="col-md-2 nav-item no-mobile location afterLogin text-right">
+                <a className="nav-link text-white pl-0 pr-2" href="#">
+                    <span className="nav-location-icon nav-location-icon mr-2 float-right">
+                        <i className="fas fa-map-marker d-flex"></i>
+                    </span>
+                    <div className="nav-left-block pr-3">
+                        <span className="nav-line-1 pb-2">Service to</span>
+                        <span className="nav-line-2">London</span>
+                    </div>
+                </a>
+            </li>);
+
+            var watchList = (<Link className="nav-link text-white fs-14" to="/customer-authentication"><strong>Watchlist</strong></Link>);
+
+
+            var customerProfileLinks = (<ul className="navbar-nav mr-auto" id="leftMenu">
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/customer-authentication">
+                        <img src={App.StaticImagesUrl + 'profile.png'} className="f_top_hamberger_icon" /><strong>Your Profile</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/customer-bookings">
+                        <img src={App.StaticImagesUrl + 'watchlist.png'} className="f_top_hamberger_icon" /><strong>Your Bookings</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white fs-14" to="/customer-authentication">
+                        <img src={App.StaticImagesUrl + 'expert.png'} className="f_top_hamberger_icon" /><strong>Your Experts</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/customer-authentication">
+                        <img src={App.StaticImagesUrl + 'address.png'} className="f_top_hamberger_icon" /><strong>Your Addresses</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/customer-authentication">
+                        <img src={App.StaticImagesUrl + 'email.png'} className="f_top_hamberger_icon" /><strong>Your Emails</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/customer-authentication">
+                        <img src={App.StaticImagesUrl + 'payment.png'} className="f_top_hamberger_icon" /><strong>Payment Details</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/customer-authentication">
+                        <img src={App.StaticImagesUrl + 'watchlist.png'} className="f_top_hamberger_icon" /><strong>Watchlist</strong>
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-white" to="/customer-authentication">
+                        <img src={App.StaticImagesUrl + 'profile.png'} className="f_top_hamberger_icon" /><strong>Sign In</strong>
+                    </Link>
+                </li>
+            </ul>);
+        }
+
+        //if (this.state.focused) {
+        //    var styles = {
+        //        display: 'block',
+        //    };
+        //}
+        if (this.state.clicked) {
+            //alert('Clicked');
+            var styles = {
+                display: 'none',
+            };
+        }
+        else {
+            var styles = {
+                display: 'block',
+            };
+        }
+
+        if (localStorage.getItem("customeraccesstoken") == null) {
+
+            var tpMobileLinks = (<div>
+                <li class="nav-item" id="">
+                    <Link class="nav-link text-white" to="/customer-authentication">
+                        <img className="tpHeaderIcons" src={App.StaticImagesUrl + 'headerPorfileIcon.png'} />
+                    </Link>
+                </li>
+                <li class="nav-item" id="">
+                    <Link class="nav-link text-white" to="/contact-us">
+                        <img className="tpHeaderIcons" src={App.StaticImagesUrl + 'headerCallIcon.png'} />
+                    </Link>
+                </li>
+            </div>);
+        }
+        else {
+
+            var tpMobileLinks = (<div>
+                <li className="nav-item" id="userName">
+                    <Link className="nav-link text-white" to="/profile">Hello, <span className="text-uppercase font-weight-bold">{localStorage.getItem("firstname")}</span></Link>
+                </li>
+                <li class="nav-item" id="">
+                    <Link class="nav-link text-white" to="/contact-us">
+                        <img className="tpHeaderIcons" src={App.StaticImagesUrl + 'headerCallIcon.png'} />
+                    </Link>
+                </li>
+            </div>);
+        }
+
+        return (
+            <div className="section-wrapper col-sm-12">
+
+                <nav className="navbar navbar-expand-lg navbar-light bg-black box mb-0" id="main-nav" onClick={this.handleClick}>
+                    <div className="row container-fluid main-nav-container">
+
+                        <div class="col-md-2 topRw pt-2">
+                            <Link className="navbar-brand pr-5 pt-2" to="/">
+                                <img className="selteqLogo" src={App.StaticImagesUrl + 'company-logo.png'} alt="Company Logo" width="auto" />
+                            </Link>
+                            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="navbar-toggler-icon"></span>
+                            </button>
+
+                            <div className="navbar-collapse yes-mobile" id="tp-mobile-right">
+                                <ul className="navbar-nav" id="iphonX">
+
+                                    <div className="nav-right-items">
+                                        {tpMobileLinks}
+                                    </div>
+                                </ul>
+                            </div>
+
+                            <div className="navbar collapse yes-mobile" id="navbarSupportedContent">
+                                <ul className="navbar-nav mr-auto" id="leftMenu">
+                                    <li className="nav-item">
+                                        <Link className="nav-link text-white fs-14" to="https://pro.findanexpert.net/" target="_blank">
+                                            <img src={App.StaticImagesUrl + 'profile.png'} className="f_top_hamberger_icon" /><strong>Become An Expert</strong></Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link text-white fs-14" to="/offers"><img src={App.StaticImagesUrl + 'offers.png'} className="f_top_hamberger_icon" /><strong>Offers</strong></Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link text-white fs-14" to="/referral"><img src={App.StaticImagesUrl + 'referral.png'} className="f_top_hamberger_icon" /><strong>Referral</strong></Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link text-white fs-14" to="/about-us"><img src={App.StaticImagesUrl + 'aboutus.png'} className="f_top_hamberger_icon" /><strong>About</strong></Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link text-white fs-14" to="https://blog.findanexpert.net/" target="_blank"><img src={App.StaticImagesUrl + 'blog.png'} className="f_top_hamberger_icon" /><strong>Blogs</strong></Link>
+                                    </li>
+                                    <li className="nav-item help">
+                                        <Link className="nav-link text-white fs-14" to="/help"><img src={App.StaticImagesUrl + 'help.png'} className="f_top_hamberger_icon" /><strong>Help</strong></Link>
+                                    </li>
+                                    <div class="dropdown-divider"></div>
+                                    {customerProfileLinks}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="col-md-8 form-inline my-2 my-lg-0 mr-auto" id="search_form">
+
+                            <form onSubmit={this.handleSubmit} action='/show-services/'>
+                                <div class="dropdown">
+                                    <input className="form-control search" type="search" placeholder="What service are you looking for?" aria-label="Search" name="search"
+                                        value={this.state.search} onChange={this.handleChangeSearch} autocomplete="off"
+                                        id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" required />
+                                    <button className="btn search-btn" type="submit" ><i className="fas fa-search text-white"></i></button>
+                                    <div class="dropdown-menu suggestionsDropDown" aria-labelledby="dropdownMenuButton">
+
+                                          <ul className="searchSuggestions" >
+                                                { this.state.search != '' ?
+                                                    this.state.allServices.map((srvtype) =>
+                                                        <li role="presentation" class="">
+                                                            <Link to={'/show-services/?search=' + srvtype.servicetypename}
+                                                                target="_self" data-purpose="es-autocomplete-result" role="menuitem" tabindex="-1">
+                                                                <span class="ellipsis">
+                                                                    <span class="es-autocomplete__type-icon udi udi-search">
+                                                                        <i class="fas fa-search"></i>
+                                                                    </span>
+                                                                    <span data-purpose="label">
+                                                                        <strong>{srvtype.servicetypename}</strong>
+                                                                    </span>
+                                                                </span>
+                                                            </Link>
+                                                        </li>
+                                                    )
+                                                    : ''
+                                                }
+                                          </ul>
+                                    
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+
+                        {topRightLink}
+
+                    </div>
+                </nav>
+
+                <nav className="navbar navbar-expand-lg navbar-light bg-black mb-0 main-menu" id="main-nav">
+                    <div className="container-fluid main-nav-container">
+
+                        <div className="navbar-collapse no-mobile" id="mainMenu">
+                            <ul className="row navbar-nav mr-auto" id="leftMenu">
+
+                                {profileLink}
+
+                                <div className="col-md-8 centerItems m-auto text-center">
+                                    <li className="nav-item">
+                                        {providerLink}
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link text-white" to="/offers">Offers</Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        {customerLink}
+                                    </li>
+                                    <li className="nav-item wtchlst_rspns">
+                                        {watchList}
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link text-white" to="/about-us">About</Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link text-white" to="https://blog.findanexpert.net/" target="_blank">Blogs</Link>
+                                    </li>
+                                    <li className="nav-item help">
+                                        <Link className="nav-link text-white" to="/help">Help</Link>
+                                    </li>
+                                </div>
+
+                                <div className="col-md-2 nav-right-items text-right">
+
+                                    <CheckLogin />
+
+                                </div>
+                            </ul>
+                        </div>
+
+                    </div>
+                </nav>
+
+                <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModal" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-body">
+
+                                <div className="row">
+                                    <div className="col-md-12 d-flex">
+                                        <div>
+                                            <img src={App.StaticImagesUrl + 'headerPorfileIcon.png'} style={iconstyle} className="change-to-white" />
+                                        </div>
+                                        <h3 className="p-0 m-0 pl-3 text-dark font-weight-bold">Expert</h3>
+                                    </div>
+                                    <div className="col-md-12 text-center fs-18 p-5">
+                                        Are you sure you want to logout?
+                                   </div>
+                                    <div className="col-md-12 text-right">
+                                        <div className="w-100">
+                                            <a class="btn bg-black text-white float-right ml-3" data-dismiss="modal">Cancel</a>
+                                            <form onSubmit={this.handleSubmit}>
+                                                <a href="/signout" className="btn text-white bg-orange">Logout</a>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+        );
+    }
+}
