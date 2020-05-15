@@ -132,7 +132,7 @@ export class CustomerCompletedBookings extends Component {
                             <div className="col-md-12">
                                 <div className="media booking-bx profileBox">
                                     {bookings.typeimagepath != null ?
-                                        <img className="card-img-top" src={App.ApisImageBaseUrl + bookings.typeimagepath}
+                                        <img className="card-img-top" src={bookings.typeimagepath}
                                             alt={bookings.servicetypename} style={styles} />
                                         : <img className="card-img-top" src={placeholderSmall}
                                             alt='placeholder' style={styles} />
@@ -140,7 +140,7 @@ export class CustomerCompletedBookings extends Component {
                                     <div className="media-body">
                                         <h5 className="service-name mt-3 ml-4 font-weight-bold">{bookings.servicetypename} <span className="small-text font-weight-normal">({bookings.servicetypeduration} hours)</span></h5>
                                         <span className="inline-items">
-                                            <div className="float-left ml-4 mt-4">
+                                            <div className="float-left  ml-4">
                                                 <h5 className="mt-0">{bookings.providername}</h5>
                                                 {bookings.reviewpoints == 5 ?
                                                     <ul className="list-unstyled list-inline ratings mb-0 pl-2">
@@ -151,28 +151,28 @@ export class CustomerCompletedBookings extends Component {
                                                         <li className="list-inline-item m-0 p-0 5th" ><i className="fas fa-star amber-text"></i></li>
                                                     </ul>
                                                     : bookings.reviewpoints == 4 ?
-                                                        <ul className="list-unstyled list-inline ratings mb-0 pl-2">    
+                                                        <ul className="list-unstyled list-inline ratings mb-0 pl-2">
                                                             <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
                                                             <li className="list-inline-item m-0 p-0 2nd" ><i className="fas fa-star amber-text"></i></li>
                                                             <li className="list-inline-item m-0 p-0 3rd" ><i className="fas fa-star amber-text"></i></li>
                                                             <li className="list-inline-item m-0 p-0 4th" ><i className="fas fa-star amber-text"></i></li>
                                                         </ul>
-                                                    : bookings.reviewpoints == 3 ?
-                                                        <ul className="list-unstyled list-inline ratings mb-0 pl-2">    
-                                                            <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
-                                                            <li className="list-inline-item m-0 p-0 2nd" ><i className="fas fa-star amber-text"></i></li>
-                                                            <li className="list-inline-item m-0 p-0 3rd" ><i className="fas fa-star amber-text"></i></li>
-                                                        </ul>
-                                                    : bookings.reviewpoints == 2 ?
-                                                        <ul className="list-unstyled list-inline ratings mb-0 pl-2">    
-                                                            <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
-                                                            <li className="list-inline-item m-0 p-0 2nd" ><i className="fas fa-star amber-text"></i></li>
-                                                        </ul>
-                                                    : bookings.reviewpoints == 1 ?
-                                                        <ul className="list-unstyled list-inline ratings mb-0 pl-2">    
-                                                            <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
-                                                        </ul>
-                                                    : 'No Review.'
+                                                        : bookings.reviewpoints == 3 ?
+                                                            <ul className="list-unstyled list-inline ratings mb-0 pl-2">
+                                                                <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
+                                                                <li className="list-inline-item m-0 p-0 2nd" ><i className="fas fa-star amber-text"></i></li>
+                                                                <li className="list-inline-item m-0 p-0 3rd" ><i className="fas fa-star amber-text"></i></li>
+                                                            </ul>
+                                                            : bookings.reviewpoints == 2 ?
+                                                                <ul className="list-unstyled list-inline ratings mb-0 pl-2">
+                                                                    <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
+                                                                    <li className="list-inline-item m-0 p-0 2nd" ><i className="fas fa-star amber-text"></i></li>
+                                                                </ul>
+                                                                : bookings.reviewpoints == 1 ?
+                                                                    <ul className="list-unstyled list-inline ratings mb-0 pl-2">
+                                                                        <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
+                                                                    </ul>
+                                                                    : 'No Review.'
                                                 }
                                             </div>
                                             <span className="date-time ml-5 float-right">
@@ -203,7 +203,7 @@ export class CustomerCompletedBookings extends Component {
                                             </span>
                                         </span>
                                     </div>
-                                
+
                                 </div>
                             </div>
 
@@ -232,9 +232,9 @@ export class CustomerCompletedBookings extends Component {
                                     <div class="media-body">
                                         <h5 class="service-name m-0 pb-4 font-weight-bold">{bookings.servicetypename} <span class="small-text font-weight-normal">({bookings.servicetypeduration} hours)</span></h5>
                                         <span class="inline-items">
-                                            <div class="float-left ml-4 mt-0">
+                                            <div class=" ml-4 mt-0">
                                                 <h5 class="mt-0">{bookings.providername}</h5>
-                                                <ul class="list-unstyled list-inline ratings mb-0 pl-2">
+                                                <ul class="list-unstyled list-inline ratings mb-0">
                                                     <li class="list-inline-item m-0 p-0 1st"><i class="fas fa-star amber-text"> </i></li>
                                                     <li class="list-inline-item m-0 p-0 2nd"><i class="fas fa-star amber-text"></i></li>
                                                     <li class="list-inline-item m-0 p-0 3rd"><i class="fas fa-star amber-text"></i></li>
@@ -242,7 +242,7 @@ export class CustomerCompletedBookings extends Component {
                                                     <li class="list-inline-item m-0 p-0 5th"><i class="fas fa-star amber-text"></i></li>
                                                 </ul>
                                             </div>
-                                            <span class="date-time mt-3 ml-4 float-left">
+                                            <span class="date-time mt-3 ">
                                                 <div className="links pb-2">
                                                     {/*<a href={'/booking/?' + btoa(encodeURIComponent('searchedservice=' + bookings.servicetypename +
                                                         '&index=' + index + '&serviceid=' + bookings.serviceid + '&servicename=' +

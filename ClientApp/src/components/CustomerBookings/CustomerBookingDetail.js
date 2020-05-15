@@ -146,9 +146,14 @@ export class CustomerBookingDetail extends Component {
                                     <div className="service-decription">
                                         <h3 className="section-title pb-2"><strong className="text-dark">Service:</strong> <span className="text-gray">{servicetypename}</span></h3>
                                         <h3 className="section-title pb-2"><strong className="text-dark">Service Provider:</strong> <span className="text-gray">{serviceprovider}</span></h3>
-                                        <p>
-                                            <strong>Notes:</strong> {bookingNotes}
-                                        </p>
+                                        {bookingNotes != null ?
+                                            <p>
+                                                <strong>Notes:</strong> {bookingNotes}
+                                            </p>
+                                            : <p>
+                                                <strong>Notes:</strong> You have added no notes
+                                            </p>
+                                        }
                                         <p>
                                             <strong>Date:</strong> {bookingdate.slice('0', 10)}
                                         </p>

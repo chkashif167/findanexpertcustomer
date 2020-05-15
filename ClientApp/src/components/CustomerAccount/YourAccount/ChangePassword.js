@@ -80,12 +80,11 @@ export class ChangePassword extends Component {
             toastr['error']('New and confirm password do not match!');
         }
         if (this.state.newpassword.length < 8) {
-            toastr['error']('Please enter atleast 8 characters!');
+            toastr['error']('Please enter at least 8 characters password');
         }
         else {
             this.UpdatePassword(password, newpassword, confirmpassword);
         }
-        
     }
 
     handleModal(e) {
@@ -130,9 +129,9 @@ export class ChangePassword extends Component {
                             <div className="row coloredBox">
 
                                 <div className="col-md-12 pt-4 pb-4">
-                                    
+
                                     <form onSubmit={this.handleSubmit}>
-                                       
+
                                         <div className="md-form pb-3">
                                             <input type="password" className="form-control validate" name="password" value={this.state.password} onChange={this.handleChangePassword} placeholder="Old Password" required />
                                         </div>

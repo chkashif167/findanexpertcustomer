@@ -75,7 +75,7 @@ export class EditCustomerBooking extends Component {
 
     checkAvailibility() {
 
-        fetch(App.ApisBaseUrlV2 + '/api/Provider/getavailabilityslots?serviceproviderId=' + this.state.providerid +
+        fetch(App.ApisBaseUrlV2 + '/api/Provider/getavailabilityslots?providerId=' + this.state.providerid +
             '&bookingDate=' + localStorage.getItem('bookingdate') + '&bookingTime=' + localStorage.getItem('bookingTime')
             + '&bookingDuration=' + this.state.bookingduration + '&authtoken=' + this.state.authtoken)
             .then(response => {
@@ -109,7 +109,7 @@ export class EditCustomerBooking extends Component {
         this.setState({ bookingtime: timeFarmated });
         localStorage.setItem('bookingTime', timeFarmated);
         console.log(localStorage.getItem('bookingTime'));
-        
+
         this.checkAvailibility();
     }
 
@@ -231,7 +231,7 @@ export class EditCustomerBooking extends Component {
 
                                     <form onSubmit={this.handleSubmit} className="editBookingForm">
 
-                                        { this.state.availableSlotAvailibility == false && this.state.availableSlots != null ?
+                                        {this.state.availableSlotAvailibility == false && this.state.availableSlots != null ?
                                             <div className="text-center">
                                                 <p>Unfortunately we are fully booked today. Please choose an alternative Date & Time from the list below.</p>
                                                 <div class="form-row">
@@ -287,7 +287,7 @@ export class EditCustomerBooking extends Component {
                                         <div className="text-center mb-3">
                                             <button className="btn btn-lg bg-orange text-white" type="submit">Confirm your Booking</button>
                                         </div>
-                                        
+
                                     </form>
                                 </div>
 

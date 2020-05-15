@@ -21,7 +21,8 @@ export class CheckLogin extends Component {
                 return response.json();
             })
             .then(data => {
-                if (data.statuscode == '200') {
+                console.log(data);
+                if (data.statuscode == 200) {
                     this.setState({ notificationlist: data.notificationlist });
                 }
             });
@@ -53,12 +54,16 @@ export class CheckLogin extends Component {
                             <div className="dropdown-divider"></div>
                             <Link className="dropdown-item" to="/referral">
                                 <i class="fas fa-user-friends text-red pr-2"></i>Recommend A Friend</Link>
-                         
+
                             <Link className="dropdown-item btn bg-lite-gray text-gray" to="" data-toggle="modal" data-target="#logoutModal">
                                 <i class="fas fa-sign-out-alt text-gray pr-2"></i>Signout</Link>
                         </div>
                     </li>
                     <li className="nav-item dropdown">
+                        {this.state.notificationlist.length > 0 ?
+                            <div className="notificationsCount"> {this.state.notificationlist.length} </div>
+                            : ""
+                        }
                         <Link className="nav-link dropdown-toggle text-white" to="#" id="notifications" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <strong><i class="fa fa-bell" aria-hidden="true"></i></strong></Link>
                         <div className="dropdown-menu notificationDropdown" aria-labelledby="notifications">
@@ -69,9 +74,9 @@ export class CheckLogin extends Component {
                                             <h5><strong>{obj.notificationtitle}</strong></h5>
                                             <p><strong>{obj.notificationbody}</strong></p>
                                         </li>)
-                                        : <li className="readNotification">
-                                            <p>You have no notifications.</p>
-                                        </li>
+                                    : <li className="readNotification">
+                                        <p>You have no notifications.</p>
+                                    </li>
                                 }
                             </div>
                         </div>
@@ -105,7 +110,7 @@ export class CheckLogin extends Component {
                                 <i class="fas fa-heart text-red pr-2"></i>Watch List</Link>
                             <Link className="dropdown-item" to="/customer-authentication">
                                 <i class="fas fa-user-friends text-red pr-2"></i>Recommend A Friend</Link>
-                            
+
                             <Link className="dropdown-item btn bg-lite-gray text-gray" to="/customer-authentication">
                                 <i class="fas fa-sign-out-alt text-gray pr-2"></i>Sign In
                             </Link>

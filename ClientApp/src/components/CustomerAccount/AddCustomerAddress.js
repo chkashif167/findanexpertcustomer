@@ -19,6 +19,7 @@ export class AddCustomerAddress extends Component {
             postalcode: '', address: '', add: false,
             showModal: '',
             modalMessage: '',
+            noAddressFound: ''
         };
     }
 
@@ -69,7 +70,8 @@ export class AddCustomerAddress extends Component {
                     this.setState({ allAddresses: data.get_address });
                 }
                 else {
-                    toastr['error'](data.message);
+                    // toastr['error'](data.message);
+                    this.setState({ noAddressFound: data.message })
                 }
             });
     }
@@ -141,8 +143,12 @@ export class AddCustomerAddress extends Component {
                                     <select className="form-control" value={this.state.address}
                                         onChange={this.handleChangeAddress.bind(this)}>
                                         <option value="">Please select an address</option>
+                                        {this.state.allAddresses &&
+                                            <option value="" selected> {this.state.noAddressFound} </option>
+                                        }
+
                                         {this.state.allAddresses.map((adr) =>
-                                            <option value={adr.replace("{", "").replace("}", "")}>{adr.replace("{", "").replace("}", "")}</option>
+                                            <option value={adr.replace("{", " ").replace("}", " ")}>{adr.replace("{", " ").replace("}", " ")}</option>
                                         )}
                                     </select>
                                 </div>

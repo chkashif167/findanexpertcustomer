@@ -65,12 +65,12 @@ export class RecommendedServices extends Component {
                             <Link to={'/services/' + encodeURI(obj.servicetypename).replace(/%20/g, '-') + 
                                 '/'} >
                                 <div className="contentWrapper">
-                                    {(obj.offer > 0) ?
-                                        <div class="ribbon ribbonTopLeft"><span>{obj.offer}% OFF</span></div>
+                                    {(obj.offerpercentage > 0) ?
+                                        <div class="ribbon ribbonTopLeft"><span>{obj.offerpercentage}% OFF</span></div>
                                         : ''
                                     }
                                     {obj.imagepath != '' ?
-                                        <img className="card-img-top" src={App.ApisImageBaseUrl + obj.imagepath}
+                                        <img className="card-img-top" src={obj.imagepath}
                                             alt={obj.servicetypename} />
                                         : <img className="card-img-top" src={placeholderSmall}
                                             alt='placeholder' />

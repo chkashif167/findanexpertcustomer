@@ -428,9 +428,9 @@ export class NavMenu extends Component {
           id="main-nav"
           onClick={this.handleClick}
         >
-          <div className="row container-fluid main-nav-container">
+          <div className=" container-fluid main-nav-container">
             <div class="col-md-2 topRw pt-2">
-              <Link className="navbar-brand pr-5 pt-2" to="/">
+              <Link className="navbar-brand pt-2" to="/">
                 <img
                   className="selteqLogo"
                   src={App.StaticImagesUrl + "company-logo.png"}
@@ -560,28 +560,28 @@ export class NavMenu extends Component {
                     <ul className="searchSuggestions">
                       {this.state.search != ""
                         ? this.state.allServices.map(srvtype => (
-                            <li role="presentation" class="">
-                              <Link
-                                to={
-                                  "/show-services/?search=" +
-                                  srvtype.servicetypename
-                                }
-                                target="_self"
-                                data-purpose="es-autocomplete-result"
-                                role="menuitem"
-                                tabindex="-1"
-                              >
-                                <span class="ellipsis">
-                                  <span class="es-autocomplete__type-icon udi udi-search">
-                                    <i class="fas fa-search"></i>
-                                  </span>
-                                  <span data-purpose="label">
-                                    <strong>{srvtype.servicetypename}</strong>
-                                  </span>
+                          <li role="presentation" class="">
+                            <Link
+                              to={
+                                "/show-services/?search=" +
+                                srvtype.servicetypename
+                              }
+                              target="_self"
+                              data-purpose="es-autocomplete-result"
+                              role="menuitem"
+                              tabindex="-1"
+                            >
+                              <span class="ellipsis">
+                                <span class="es-autocomplete__type-icon udi udi-search">
+                                  <i class="fas fa-search"></i>
                                 </span>
-                              </Link>
-                            </li>
-                          ))
+                                <span data-purpose="label">
+                                  <strong>{srvtype.servicetypename}</strong>
+                                </span>
+                              </span>
+                            </Link>
+                          </li>
+                        ))
                         : ""}
                     </ul>
                   </div>
@@ -599,7 +599,7 @@ export class NavMenu extends Component {
         >
           <div className="container-fluid main-nav-container">
             <div className="navbar-collapse no-mobile" id="mainMenu">
-              <ul className="row navbar-nav mr-auto" id="leftMenu">
+              <ul className="navbar-nav mr-auto" id="leftMenu">
                 {profileLink}
 
                 <div className="col-md-8 centerItems m-auto text-center">

@@ -36,7 +36,6 @@ export class ServiceAreas extends Component {
         var decodedString = window.atob(search.replace('?', ''));
         const decodeParams = decodeURIComponent(decodedString);
         const params = new URLSearchParams(decodeParams);
-
         const serviceType = params.get('serviceType');
         const categoryid = params.get('categoryid');
         const servicetypeid = params.get('servicetypeid');
@@ -45,9 +44,16 @@ export class ServiceAreas extends Component {
         const inclinic = params.get('inclinic');
         const hasquestions = params.get('hasquestions');
         const hassession = params.get('hassession');
+        const hasclickedfreeconsultation = params.get('hasclickedfreeconsultation');
+
         const isfreeconsultation = params.get('isfreeconsultation');
+        localStorage.setItem('isfreeconsultation', isfreeconsultation);
         const requiredgenderpreference = params.get('requiredgenderpreference');
         localStorage.setItem('requiredgenderpreference', requiredgenderpreference);
+        const referralbonus = params.get('referralbonus');
+        localStorage.setItem('referralbonus', referralbonus);
+        const offer = params.get('offer');
+        localStorage.setItem('offer', offer);
 
         this.state = {
             serviceType: serviceType,
@@ -59,6 +65,7 @@ export class ServiceAreas extends Component {
             hasquestions: hasquestions,
             hassession: hassession,
             isfreeconsultation: isfreeconsultation,
+            hasclickedfreeconsultation: hasclickedfreeconsultation,
             authToken: localStorage.getItem("customeraccesstoken"),
             apiResponse: [],
             configList: [], variantsList: [], areasList: [], currentDate: dateFormatted,
@@ -70,7 +77,9 @@ export class ServiceAreas extends Component {
             discount: 0, finalPrice: 0,
             checkboxStatus: false, bookingID: 0,
             discountlist: [],
-            checkPriceBtn: false
+            checkPriceBtn: false,
+            offerDiscount: 0,
+            hasclickedfreeconsultationBtn: false
         };
     }
 
@@ -99,11 +108,16 @@ export class ServiceAreas extends Component {
     }
 
     handleChangePackages(e) {
+
+        if (this.state.hasclickedfreeconsultation == "true") {
+            this.setState({ hasclickedfreeconsultationBtn: true })
+        }
+
         var checkBox = document.getElementById(e.target.id);
         this.setState({ checkboxStatus: document.getElementById(e.target.id) });
 
         var areasInnerList = [];
-        
+
         if (checkBox.checked == true) {
             for (var i = 0; i < this.state.areasList.length; i++) {
                 if (i == e.target.id) {
@@ -138,7 +152,7 @@ export class ServiceAreas extends Component {
                     }
 
                     this.state.packagePrices.pop(e.target.getAttribute('name'));
-                    
+
                     //this.state.areaDurations.push(areasInnerList[0].map(obj => obj.duration));
                 }
             }
@@ -166,10 +180,15 @@ export class ServiceAreas extends Component {
                 }
             }
 
-            this.setState({ areasTotalPrice: this.state.packagePricesSum });
+            if (localStorage.getItem('offer') > '0') {
+                var offerDiscount = localStorage.getItem('offer') * this.state.packagePricesSum / 100;
+                this.setState({ offerDiscount: offerDiscount });
+                this.setState({ areasTotalPrice: Math.round(this.state.packagePricesSum - offerDiscount) });
+            }
+            else {
+                this.setState({ areasTotalPrice: this.state.packagePricesSum });
+            }
         }
-
-        console.log(this.state.areasTotalPrice);
     }
 
     handleChangeAreasPriceList(e) {
@@ -184,7 +203,7 @@ export class ServiceAreas extends Component {
                 'packagedetailid': parseInt(e.target.getAttribute('rel'))
             }
             console.log(areaidlistObjects);
-            
+
             this.state.areaidList.push(areaidlistObjects);
             this.state.areaDurations.push(e.target.value);
             this.state.areaPrices.push(e.target.className);
@@ -211,7 +230,7 @@ export class ServiceAreas extends Component {
             this.state.areaDurationsSum += parseInt(this.state.areaDurations[i]);
         }
 
-        
+
         this.state.areasTotalPrice = 0;
         for (var i = 0; i < this.state.areaPrices.length; i++) {
             var priceSum = this.state.areaPrices[i];
@@ -220,6 +239,12 @@ export class ServiceAreas extends Component {
 
         if (this.state.packagePricesSum != 0) {
             this.state.areasTotalPrice += parseInt(this.state.packagePricesSum);
+        }
+
+        if (localStorage.getItem('offer') > '0') {
+            var offerDiscount = localStorage.getItem('offer') * this.state.areasTotalPrice / 100;
+            this.setState({ offerDiscount: offerDiscount });
+            this.setState({ areasTotalPrice: this.state.areasTotalPrice - offerDiscount });
         }
 
         console.log(this.state.areaidList);
@@ -233,46 +258,39 @@ export class ServiceAreas extends Component {
         console.log(this.state.areasTotalPrice);
         console.log(this.state.areaDurationsSum);
 
-        if (this.state.checkboxStatus.checked == true) {
-            for (var i = 0; i < this.state.configList.length; i++) {
-                if (this.state.configList[i].number == this.state.areaidList.length) {
-                    var calculateDiscount = this.state.configList[i].offer * this.state.areasTotalPrice / 100;
-                    this.setState({ discount: calculateDiscount });
-                    var applyDiscount = this.state.areasTotalPrice - calculateDiscount;
-                    this.setState({ finalPrice: applyDiscount });
-                }
-                else if (this.state.configList[i].number != this.state.areaidList.length &&
-                    this.state.areaidList.length > this.state.configList[i].number) {
-                    var calculateDiscount = this.state.configList.slice(-1)[0].offer * this.state.areasTotalPrice / 100;
-                    this.setState({ discount: calculateDiscount });
-                    var applyDiscount = this.state.areasTotalPrice - calculateDiscount;
-                    this.setState({ finalPrice: applyDiscount });
-                }
+        for (var i = 0; i < this.state.configList.length; i++) {
+            if (this.state.configList[i].number == this.state.areaidList.length) {
+                var calculateDiscount = this.state.configList[i].offer * this.state.areasTotalPrice / 100;
+                this.setState({ discount: calculateDiscount });
+                var applyDiscount = Math.round(this.state.areasTotalPrice - calculateDiscount);
+                this.setState({ finalPrice: applyDiscount });
+            }
+            else if (this.state.configList[i].number != this.state.areaidList.length &&
+                this.state.areaidList.length > this.state.configList[i].number) {
+                var calculateDiscount = this.state.configList.slice(-1)[0].offer * this.state.areasTotalPrice / 100;
+                this.setState({ discount: calculateDiscount });
+                var applyDiscount = Math.round(this.state.areasTotalPrice - calculateDiscount);
+                this.setState({ finalPrice: applyDiscount });
             }
         }
-        else if (this.state.checkboxStatus.checked == false) {
 
-            this.state.areaIds.pop(e.target.value);
-            this.state.areaDurations.pop(e.target.getAttribute('name'));
-            this.state.areaPrices.pop(e.target.className);
-
-            for (var i = 0; i < this.state.configList.length; i++) {
-
-                if (this.state.configList[i].number == this.state.areaidList.length) {
-                    var calculateDiscount = this.state.configList[i].offer * this.state.areasTotalPrice / 100;
-                    this.setState({ discount: calculateDiscount });
-                    var applyDiscount = this.state.areasTotalPrice - calculateDiscount;
-                    this.setState({ finalPrice: applyDiscount });
-                }
-                else if (this.state.configList[i].number != this.state.areaidList.length &&
-                    this.state.areaidList.length > this.state.configList[i].number) {
-                    var calculateDiscount = this.state.configList.slice(-1)[0].offer * this.state.areasTotalPrice / 100;
-                    this.setState({ discount: calculateDiscount });
-                    var applyDiscount = this.state.areasTotalPrice - calculateDiscount;
-                    this.setState({ finalPrice: applyDiscount });
-                }
-            }
-        }
+        //else if (this.state.checkboxStatus.checked == false) {
+        //for (var i = 0; i < this.state.configList.length; i++) {
+        //    if (this.state.configList[i].number == this.state.areaidList.length) {
+        //        var calculateDiscount = this.state.configList[i].offer * this.state.areasTotalPrice / 100;
+        //        this.setState({ discount: calculateDiscount });
+        //        var applyDiscount = this.state.areasTotalPrice - calculateDiscount;
+        //        this.setState({ finalPrice: applyDiscount });
+        //    }
+        //    else if (this.state.configList[i].number != this.state.areaidList.length &&
+        //        this.state.areaidList.length > this.state.configList[i].number) {
+        //        var calculateDiscount = this.state.configList.slice(-1)[0].offer * this.state.areasTotalPrice / 100;
+        //        this.setState({ discount: calculateDiscount });
+        //        var applyDiscount = this.state.areasTotalPrice - calculateDiscount;
+        //        this.setState({ finalPrice: applyDiscount });
+        //    }
+        //}
+        //}
 
         if (this.state.finalPrice != 0) {
             localStorage.setItem('serviceFinalPrice', this.state.finalPrice);
@@ -283,7 +301,7 @@ export class ServiceAreas extends Component {
 
         var areaIDs = this.state.areaIds;
         var areaIdsList = areaIDs.map(Number);
-        
+
         //-- Get BookingId --//
         const requestOptions = {
             method: 'POST',
@@ -314,15 +332,78 @@ export class ServiceAreas extends Component {
             });
     }
 
+
+
+    getBookingIdFnc = (e) => {
+
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                bookingid: localStorage.getItem('bookingId') == null ? 0 : parseInt(localStorage.getItem('bookingId')),
+                categoryid: parseInt(this.state.categoryid),
+                servicetypeid: parseInt(this.state.servicetypeid),
+                areaidlist: this.state.areaidList,
+                isfreeconsultation: this.state.isfreeconsultation != null ? this.state.isfreeconsultation == 'true' ? true : false : false,
+                deviceplatform: "web",
+                devicename: "web",
+                authtoken: this.state.authToken
+            })
+        };
+        fetch(App.ApisBaseUrlV2 + '/api/Booking/doareabooking', requestOptions)
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                if (data.statuscode == '200') {
+
+                    this.setState({ bookingID: data.bookingid });
+                    localStorage.setItem('bookingId', this.state.bookingID);
+                    console.log(localStorage.getItem('bookingId'));
+                    window.location = '/areas-date-time/?' + btoa(encodeURIComponent('serviceType=' + this.state.serviceType + '&categoryid=' + this.state.categoryid + '&servicetypeid=' + this.state.servicetypeid +
+                        '&servicetypename=' + this.state.serviceTypeName + '&bookingid=' + this.state.bookingID + '&totalprice=' + this.state.finalPrice +
+                        '&inhouse=' + this.state.inhouse + '&inclinic=' + this.state.inclinic +
+                        '&bookingduration=' + this.state.areaDurationsSum + '&isfreeconsultation=' + this.state.isfreeconsultation + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation));
+
+
+                }
+
+            });
+    }
+
     otherAction(e) {
         e.preventDefault();
 
-        //-- Save Booking Discount --//
-        var discountListKeysValues = {
-            'discounttype': 'variantdiscount',
-            'discount': parseInt(this.state.discount)
+        if (this.state.hasclickedfreeconsultation == "true") {
+
+
+            this.getBookingIdFnc();
+            return false
+
         }
-        this.state.discountlist.push(discountListKeysValues);
+
+
+
+        //-- Save Booking Discount --//
+        if (this.state.offerDiscount > 0) {
+            var discountListKeysValues = {
+                'discounttype': 'Offer',
+                'discount': parseInt(this.state.offerDiscount)
+            }
+            var discountListKeysValues1 = {
+                'discounttype': 'Area package discount',
+                'discount': parseInt(this.state.discount)
+            }
+            this.state.discountlist.push(discountListKeysValues);
+            this.state.discountlist.push(discountListKeysValues1);
+        }
+        else {
+            var discountListKeysValues = {
+                'discounttype': 'Area package discount',
+                'discount': parseInt(this.state.discount)
+            }
+            this.state.discountlist.push(discountListKeysValues);
+        }
 
         const bookingDiscountPrams = {
             method: 'POST',
@@ -334,39 +415,37 @@ export class ServiceAreas extends Component {
             })
         };
 
-        console.log(bookingDiscountPrams);
-
         fetch(App.ApisBaseUrlV2 + '/api/Booking/savebookingdiscount', bookingDiscountPrams)
             .then(response => {
                 return response.json();
             })
             .then(data => {
-                console.log(data);
+
                 if (data.statuscode == 200) {
-                    if (this.state.isfreeconsultation == 'true') {
+                    if (this.state.hasclickedfreeconsultation == 'true') {
                         window.location = '/areas-date-time/?' + btoa(encodeURIComponent('serviceType=' + this.state.serviceType + '&categoryid=' + this.state.categoryid + '&servicetypeid=' + this.state.servicetypeid +
                             '&servicetypename=' + this.state.serviceTypeName + '&bookingid=' + this.state.bookingID + '&totalprice=' + this.state.finalPrice +
                             '&inhouse=' + this.state.inhouse + '&inclinic=' + this.state.inclinic +
-                            '&bookingduration=' + this.state.areaDurationsSum + '&isfreeconsultation=' + this.state.isfreeconsultation));
+                            '&bookingduration=' + this.state.areaDurationsSum + '&isfreeconsultation=' + this.state.isfreeconsultation + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation));
                     }
                     else {
                         if (this.state.hassession == 'true') {
                             window.location = '/service-sessions/?' + btoa(encodeURIComponent('serviceType=' + this.state.serviceType + '&categoryid=' + this.state.categoryid + '&servicetypeid=' + this.state.servicetypeid +
                                 '&servicetypename=' + this.state.serviceTypeName + '&bookingid=' + this.state.bookingID +
                                 '&inhouse=' + this.state.inhouse + '&inclinic=' + this.state.inclinic + '&totalprice=' +
-                                this.state.finalPrice + '&bookingduration=' + this.state.areaDurationsSum));
+                                this.state.finalPrice + '&bookingduration=' + this.state.areaDurationsSum + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation));
                         }
                         else if (this.state.hasquestions == 'true') {
                             window.location = '/questions-answers/?' + btoa(encodeURIComponent('serviceType=' + this.state.serviceType + '&categoryid=' + this.state.categoryid + '&servicetypeid=' + this.state.servicetypeid +
                                 '&servicetypename=' + this.state.serviceTypeName + '&bookingid=' + this.state.bookingID +
                                 '&inhouse=' + this.state.inhouse + '&inclinic=' + this.state.inclinic + '&totalprice=' +
-                                this.state.finalPrice + '&bookingduration=' + this.state.areaDurationsSum));
+                                this.state.finalPrice + '&bookingduration=' + this.state.areaDurationsSum + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation));
                         }
                         else {
                             window.location = '/areas-date-time/?' + btoa(encodeURIComponent('serviceType=' + this.state.serviceType + '&categoryid=' + this.state.categoryid + '&servicetypeid=' + this.state.servicetypeid +
                                 '&servicetypename=' + this.state.serviceTypeName + '&bookingid=' + this.state.bookingID + '&totalprice=' + this.state.finalPrice +
                                 '&inhouse=' + this.state.inhouse + '&inclinic=' + this.state.inclinic +
-                                '&bookingduration=' + this.state.areaDurationsSum));
+                                '&bookingduration=' + this.state.areaDurationsSum + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation));
                         }
                     }
                 }
@@ -375,21 +454,30 @@ export class ServiceAreas extends Component {
 
     render() {
 
+
+
         return (
             <div id="MainPageWrapper">
 
-                <section className="bookingPage account-details section-padding">
+                <section className="bookingPage account-details pb-4">
                     <div className="services-wrapper">
-                        <div className="container">
-                            <div className="row pb-4">
 
-                                <div className="col-md-12">
-                                    <div className="row bookingPageTpRw bg-gray p-2">
-                                        <div className="col-md-6">
-                                            <p className="lead mb-0 service-name text-white">{this.state.serviceTypeName}</p>
+                        <div className="bookingPageTpRwWrapper">
+                            <div className="container">
+                                <div className="row">
+                                    <div className="col-md-12">
+                                        <div className="row bookingPageTpRw cardWrapWithShadow bg-half-white">
+                                            <div className="col-md-6">
+                                                <p className="lead mb-0 service-name">{this.state.serviceTypeName}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div className="container">
+                            <div className="row pb-4">
 
                                 <div className="col-md-12">
 
@@ -412,7 +500,7 @@ export class ServiceAreas extends Component {
                                         <div className="row pt-4 pb-4">
 
                                             {this.state.variantsList.map((obj1, index) =>
-                                                <div className="col-md-6 pt-5">
+                                                <div className="col-md-6 pb-4 areaCardWrapper">
                                                     <div id="accordion">
                                                         <div class="card areasCard">
                                                             <div class="card-header" id="headingOne">
@@ -424,13 +512,28 @@ export class ServiceAreas extends Component {
                                                                                     onChange={this.handleChangePackages.bind(this)}
                                                                                 />
                                                                                 <label class="form-check-label" for={index}>
-                                                                                    {obj1.packagename} <span className="text-red">£{obj1.packageprice}</span>
+                                                                                    {obj1.packagename}
+                                                                                    <span className="text-red">
+                                                                                        {
+                                                                                            this.state.hasclickedfreeconsultation == "false" ?
+                                                                                                localStorage.getItem('offer') > '0' ?
+                                                                                                    '£' + Math.round(obj1.packageprice - localStorage.getItem('offer') * obj1.packageprice / 100)
+                                                                                                    : '£' + obj1.packageprice
+                                                                                                : ""
+                                                                                        }
+                                                                                    </span>
                                                                                 </label>
                                                                             </div>
                                                                         </a>
                                                                         : <a class="btn btn-link" data-toggle="collapse" data-target="#collapseOne"
                                                                             aria-expanded="true" aria-controls="collapseOne">
-                                                                            {obj1.packagename} <span className="text-red">£{obj1.packageprice}</span>
+                                                                            {obj1.packagename}
+                                                                            <span className="text-red">£
+                                                                                {localStorage.getItem('offer') > '0' ?
+                                                                                    Math.round(obj1.packageprice - localStorage.getItem('offer') * obj1.packageprice / 100)
+                                                                                    : obj1.packageprice
+                                                                                }
+                                                                            </span>
                                                                         </a>
                                                                     }
                                                                 </h5>
@@ -438,15 +541,13 @@ export class ServiceAreas extends Component {
 
                                                             <div id="collapseOne" className="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
                                                                 <div class="card-body">
-                                                                    
+                                                                    {obj1.isallselectable == true ?
+                                                                        <p>(All of the Following)</p>
+                                                                        : ''
+                                                                    }
                                                                     {obj1.isallselectable == true ?
                                                                         this.state.variantsList[index].areaslist.map((obj, index) =>
-                                                                            <div className="areaChecks">
-                                                                                <input type="checkbox" disabled />
-                                                                                <label class="form-check-label" for={obj.areaid}>
-                                                                                    {obj.areaname}
-                                                                                </label>
-                                                                            </div>
+                                                                            <span>{obj.areaname},</span>
                                                                         )
                                                                         : this.state.variantsList[index].areaslist.map((obj, index) =>
                                                                             <div className="areaChecks">
@@ -468,20 +569,30 @@ export class ServiceAreas extends Component {
                                                 </div>
                                             )}
 
-                                            <div className="col-md-12">
-                                                <form onSubmit={this.handleSubmit.bind(this)} >
-                                                    <div className="text-center mb-3 checkoutBtn">
-                                                        <button className="btn btn-lg bg-orange text-white" type="submit">Check Price</button>
-                                                    </div>
-                                                </form>
-                                            </div>
+                                            {this.state.hasclickedfreeconsultation == "false" ?
+                                                < div className="col-md-12">
+                                                    <form onSubmit={this.handleSubmit.bind(this)} >
+                                                        <div className="text-center mb-3 checkoutBtn">
+                                                            <button className="btn btn-lg bg-orange text-white" type="submit">Check Price</button>
+                                                        </div>
+                                                    </form>
+                                                </div> : ""}
 
                                             {this.state.checkPriceBtn == true ?
                                                 <div class="col-md-12 pt-5 notes">
                                                     <div class="col-md-12 cardWrapWithShadow bg-lite-gray">
-                                                        <p className="lead">Actual Price <span className="pl-5">£{this.state.areasTotalPrice}</span></p>
+                                                        <p className="lead">Actual Price
+                                                            <span className="pl-5">£{Math.round(this.state.areasTotalPrice)}
+                                                                <small className="pl-3">
+                                                                    {localStorage.getItem('offer') > '0' ?
+                                                                        (localStorage.getItem('offer') + '% Discount applied')
+                                                                        : ''
+                                                                    }
+                                                                </small>
+                                                            </span>
+                                                        </p>
                                                         {this.state.finalPrice != 0 ?
-                                                            <p className="lead">Discounted Price <span className="pl-5">£ {this.state.finalPrice}</span></p>
+                                                            <p className="lead">Discounted Price <span className="pl-5">£ {Math.round(this.state.finalPrice)}</span></p>
                                                             : ''
                                                         }
                                                     </div>
@@ -494,7 +605,7 @@ export class ServiceAreas extends Component {
                                         <div className="row">
                                             <div className="col-md-12">
                                                 <div className="text-center mb-3 checkoutBtn">
-                                                    {this.state.bookingID != 0 ?
+                                                    {this.state.hasclickedfreeconsultationBtn || this.state.checkPriceBtn ?
                                                         <button className="btn btn-lg bg-orange text-white" type="submit"
                                                             onClick={this.otherAction.bind(this)}>Next Step</button>
                                                         : ''
@@ -511,7 +622,7 @@ export class ServiceAreas extends Component {
                     </div>
                 </section>
 
-            </div>
+            </div >
         );
     }
 }

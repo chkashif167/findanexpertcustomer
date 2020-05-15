@@ -2,6 +2,7 @@
 import App from '../App';
 import { Link } from 'react-router-dom';
 import placeholderLarge from '../assets/img/placeholderLarge.jpg';
+import freeServiceLabel from '../assets/img/free-service-label.png';
 
 export class SearchServiceTypeFromFooter extends Component {
     displayName = SearchServiceTypeFromFooter.name
@@ -21,7 +22,7 @@ export class SearchServiceTypeFromFooter extends Component {
         const categoryid = params.get('ID');
         const pageNumber = params.get('page');
 
-        fetch(App.ApisBaseUrlV2 + '/api/ServiceType/getservicetypesV2?categoryid=' + categoryid)
+        fetch(App.ApisBaseUrlV2 + '/api/ServiceType/getservicetypesV2?apikey=XzUzTFQzUS5AUEkudkAyX5OG8eakYoY5XY39bxPGnvU=&categoryid=' + categoryid)
             .then(response => {
                 console.log(response);
                 return response.json();
@@ -65,15 +66,21 @@ export class SearchServiceTypeFromFooter extends Component {
                     <div class="card booking-card serviceBox">
 
                         <div class="serviceImage">
-                            {srvtype.imagepath != '' ?
-                                <img className="card-img-top" src={App.ApisImageBaseUrl + srvtype.imagepath}
-                                    alt={srvtype.servicetypename} />
-                                : <img className="card-img-top" src={placeholderLarge}
-                                    alt='placeholder' />
-                            }
-                            <div className="serviceTitle">
-                                <h3 className={index} id={srvtype.servicetypeid} onClick={this.getServiceTypeID}>
-                                    {srvtype.servicetypename}</h3>
+                            <div className="contentWrapper">
+                                {(srvtype.offerpercentage > 0) ?
+                                    <div class="ribbon ribbonTopLeft"><span>{srvtype.offerpercentage}% OFF</span></div>
+                                    : ''
+                                }
+                                {srvtype.imagepath != '' ?
+                                    <img className="card-img-top" src={srvtype.imagepath}
+                                        alt={srvtype.servicetypename} />
+                                    : <img className="card-img-top" src={placeholderLarge}
+                                        alt='placeholder' />
+                                }
+                                <div className="serviceTitle">
+                                    <h3 className={index} id={srvtype.servicetypeid} onClick={this.getServiceTypeID}>
+                                        {srvtype.servicetypename}</h3>
+                                </div>
                             </div>
                         </div>
                     </div>

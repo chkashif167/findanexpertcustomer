@@ -1,6 +1,7 @@
 ﻿import React, { Component } from 'react';
 import { SidebarLinks } from '../YourAccount/SidebarLinks';
 import App from '../../../App';
+import placeholderSmall from '../../../assets/img/placeholderSmall.jpg';
 
 export class YourExperts extends Component {
     displayName = YourExperts.name
@@ -32,7 +33,7 @@ export class YourExperts extends Component {
                 return response.json();
             })
             .then(data => {
-                console.log(data);
+
                 this.setState({ apiResponse: data.statuscode });
                 this.setState({ totalPages: data.pagination });
                 this.setState({ expertList: data.expertlist, loading: false });
@@ -134,8 +135,17 @@ export class YourExperts extends Component {
                                 {this.state.expertList.map((experts, index) =>
                                     <div className="col-md-12 pb-4">
                                         <div className="media watchlist-bx yourExperts profileBox bg-half-white p-4">
-                                            <a href="#">
-                                                <img className="d-flex pr-4" src={App.ApisBaseUrlV2 + experts.providerimagepath} className="mr-3" height="130" width="" alt="avatar" />
+
+                                            <a href="javascript:void(0)">
+
+                                                {experts.typeimagepath != "" ?
+                                                    <img className="d-flex pr-4" src={experts.typeimagepath}
+                                                        alt="avatar" />
+                                                    : <img className="d-flex pr-4" src={placeholderSmall}
+                                                        alt='placeholder' />
+                                                }
+
+
                                             </a>
                                             <div className="media-body pl-4">
                                                 <h4 className="mt-0 font-weight-bold">{experts.providername}</h4>

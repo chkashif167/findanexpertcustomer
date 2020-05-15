@@ -24,7 +24,7 @@ export class AllCustomerAddresses extends Component {
                     return response.json();
                 })
                 .then(data => {
-                    console.log(data);
+                    console.log("tttttttttttttttttttt", data.addresslist);
                     this.setState({ getAddressApiResponse: data.statuscode });
                     if (data.statuscode == 200) {
                         this.setState({ allAddress: data.addresslist });
@@ -103,14 +103,17 @@ export class AllCustomerAddresses extends Component {
                             <div class="card colored-card addressCard profileBox">
                                 <div class="card-body p-0">
                                     <h6 class="card-title">
-                                        {adr.address.split('\n').map(function (item, key) {
+                                        {/* {adr.address.split('\n').map(function (item, key) {
                                             return (
                                                 <span key={key}>
                                                     {item}
                                                     <br />
                                                 </span>
                                             )
-                                        })}
+                                        })} */}
+                                        {
+                                            adr.address
+                                        }
                                     </h6>
                                     <div class="d-block d-md-flex float-right">
                                         <div class="flex-1 mr-2">

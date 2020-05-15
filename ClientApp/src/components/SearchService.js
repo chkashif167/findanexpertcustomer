@@ -15,7 +15,7 @@ export class SearchService extends Component {
         const params = new URLSearchParams(search);
         const keyWord = params.get('search');
 
-        this.state = { search: keyWord, allServices: [], found: false };
+        this.state = { search: keyWord, allServices: [], found: false, noSearchResult: "none" };
     }
 
     componentDidMount() {
@@ -24,7 +24,7 @@ export class SearchService extends Component {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                searchservice: this.state.search
+                searchservice: this.state.search,
             })
         };
 
@@ -39,6 +39,7 @@ export class SearchService extends Component {
                 }
                 else {
                     this.state.allServices = [];
+                    this.setState({ noSearchResult: "block" })
                 }
             });
     }
@@ -58,35 +59,34 @@ export class SearchService extends Component {
     renderAvailableServices(allServices) {
 
         const listItems = allServices.map((obj, index) => (
-                
-                <li class="searchItem">
-                    <a href={'/services/' + encodeURI(obj.servicetypename).replace(/%20/g, '-') + 
-                        '/'} >
-                        <div class="card booking-card serviceBox">
+            <li class="searchItem">
+                <a href={'/services/' + encodeURI(obj.servicetypename).replace(/%20/g, '-') +
+                    '/'} >
+                    <div class="card booking-card serviceBox">
 
-                            <div class="serviceImage">
-                                <div className="contentWrapper">
-                                    {(obj.offer > 0) ?
-                                        <div class="ribbon ribbonTopLeft"><span>{obj.offer}% OFF</span></div>
-                                        : ''
-                                    }
-                                    {obj.imagepath != '' ?
-                                        <img className="card-img-top" src={App.ApisImageBaseUrl + obj.imagepath}
-                                            alt={obj.servicetypename} />
-                                        : <img className="card-img-top" src={placeholderLarge}
-                                            alt='placeholder' />
-                                    }
-                                    <div className="serviceTitle">
-                                        <h3 className={index} id={obj.servicetypeid}>
-                                            {obj.servicetypename}
-                                        </h3>
-                                    </div>
+                        <div class="serviceImage">
+                            <div className="contentWrapper">
+                                {(obj.offerpercentage > 0) ?
+                                    <div class="ribbon ribbonTopLeft"><span>{obj.offerpercentage}% OFF</span></div>
+                                    : ''
+                                }
+                                {obj.imagepath != '' ?
+                                    <img className="card-img-top" src={obj.imagepath}
+                                        alt={obj.servicetypename} />
+                                    : <img className="card-img-top" src={placeholderLarge}
+                                        alt='placeholder' />
+                                }
+                                <div className="serviceTitle">
+                                    <h3 className={index} id={obj.servicetypeid}>
+                                        {obj.servicetypename}
+                                    </h3>
                                 </div>
                             </div>
-
                         </div>
-                    </a>
-                </li>
+
+                    </div>
+                </a>
+            </li>
         ));
 
         return (
@@ -98,7 +98,8 @@ export class SearchService extends Component {
                             <ul>
                                 {listItems}
                             </ul>
-                            : <div className="col-md-12 text-center notFoundPage pt-4">
+                            : <div className="col-md-12 text-center notFoundPage pt-4"
+                                style={{ display: this.state.noSearchResult }}>
                                 <div class="text">
                                     <p className="lead">Your search did not match any service. Please try again!</p>
                                 </div>
@@ -110,7 +111,7 @@ export class SearchService extends Component {
                 </div>
             </section>
         );
-        
+
     }
 
     whenFreeTreatmentTrue(allServices) {
@@ -191,7 +192,7 @@ export class SearchService extends Component {
                                 <div class="ribbon ribbonTopLeft"><span>{srvtype.offerdiscount}% OFF</span></div>
                                 : ''
                             }
-                            <img className={index} src={App.ApisImageBaseUrl + srvtype.servicetypeimagepath} alt={srvtype.servicetypename}
+                            <img className={index} src={srvtype.servicetypeimagepath} alt={srvtype.servicetypename}
                                 id={srvtype.servicetypeid} onClick={this.getServiceTypeID} />
                             <div className="serviceTitle">
                                 <h3 className={index} id={srvtype.servicetypeid} onClick={this.getServiceTypeID}>

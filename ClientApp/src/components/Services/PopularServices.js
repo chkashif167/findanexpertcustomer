@@ -19,7 +19,7 @@ export class PopularServices extends Component {
 
     componentDidMount() {
 
-        fetch(App.ApisBaseUrlV2 + '/api/ServiceType/getpromoservicetypesV2')
+        fetch(App.ApisBaseUrlV2 + '/api/ServiceType/getpromoservicetypesV2?apikey=XzUzTFQzUS5AUEkudkAyX5OG8eakYoY5XY39bxPGnvU=')
             .then(response => {
                 return response.json();
             })
@@ -57,13 +57,13 @@ export class PopularServices extends Component {
                             '/'} >
                             <div className="contentWrapper">
 
-                                {(obj.offer > 0) ?
-                                    <div class="ribbon ribbonTopLeft"><span>{obj.offer}% OFF</span></div>
+                                {(obj.offerpercentage > 0) ?
+                                    <div class="ribbon ribbonTopLeft"><span>{obj.offerpercentage}% OFF</span></div>
                                     : ''
                                 }
 
                                 {obj.imagepath != '' ?
-                                    <img className="card-img-top" src={App.ApisImageBaseUrl + obj.imagepath}
+                                    <img className="card-img-top" src={obj.imagepath}
                                         alt={obj.servicetypename} />
                                     : <img className="card-img-top" src={placeholderLarge}
                                         alt='placeholder' />

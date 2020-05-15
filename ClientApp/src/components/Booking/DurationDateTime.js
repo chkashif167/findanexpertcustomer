@@ -18,7 +18,7 @@ export class DurationDateTime extends Component {
         var decodedString = window.atob(search.replace('?', ''));
         const decodeParams = decodeURIComponent(decodedString);
         const params = new URLSearchParams(decodeParams);
-
+        const hasclickedfreeconsultation = params.get('hasclickedfreeconsultation');
         const serviceType = params.get('serviceType');
         const bookingid = params.get('bookingid');
         const servicetypeid = params.get('servicetypeid');
@@ -32,11 +32,9 @@ export class DurationDateTime extends Component {
         const hasquestions = params.get('hasquestions');
         const hassession = params.get('hassession');
         const isfreeconsultation = params.get('isfreeconsultation');
-        const inhouseprice = params.get('inhouseprice');
-        const inclinicprice = params.get('inclinicprice');
+        const totalprice = params.get('totalprice');
 
         var currentTime = moment();
-        console.log(moment());
 
         this.state = {
             serviceType: serviceType,
@@ -51,8 +49,7 @@ export class DurationDateTime extends Component {
             inclinic: inclinic,
             hassession: hassession,
             isfreeconsultation: isfreeconsultation,
-            inclinicprice: inclinicprice,
-            inhouseprice: inhouseprice,
+            totalprice: totalprice,
             authtoken: localStorage.getItem("customeraccesstoken"),
             bookingdate: '',
             bookingtime: '',
@@ -64,8 +61,8 @@ export class DurationDateTime extends Component {
             availibilityTimeSlots: [],
             availableDate: '',
             availableTime: '',
-            finalPrice: 0,
-            loader: false
+            loader: false,
+            hasclickedfreeconsultation: hasclickedfreeconsultation
         };
 
         this.handleChangeBookingDate = this.handleChangeBookingDate.bind(this);
@@ -181,7 +178,7 @@ export class DurationDateTime extends Component {
         var providerId = parseInt(localStorage.getItem('providerid'));
         var bookingDuration = parseInt(this.state.bookingduration);
 
-        fetch(App.ApisBaseUrlV2 + '/api/Provider/getavailabilityslots?providerid=' + providerId + 
+        fetch(App.ApisBaseUrlV2 + '/api/Provider/getavailabilityslots?providerid=' + providerId +
             '&bookingDuration=' + bookingDuration + '&bookingTime=' + localStorage.getItem('bookingTime') +
             '&bookingDate=' + localStorage.getItem('bookingdate') + '&authtoken=' + this.state.authtoken)
             .then(response => {
@@ -252,13 +249,6 @@ export class DurationDateTime extends Component {
 
     saveDurationBookingDateTime(bookingid, bookingdate, bookingtime, notes, authtoken) {
 
-        if (this.state.inhouse == 'true') {
-            var finalPrice = this.state.inhouseprice;
-        }
-        else {
-            var finalPrice = this.state.inclinicprice;
-        }
-
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -282,20 +272,11 @@ export class DurationDateTime extends Component {
                 if (response.statuscode == 200) {
                     if (this.state.isfreeconsultation == 'true') {
                         window.location = '/duration-summary/?' + btoa(encodeURIComponent('bookingid=' + this.state.bookingid +
-                            '&isfreeconsultation=' + this.state.isfreeconsultation));
+                            '&isfreeconsultation=' + this.state.isfreeconsultation + '&totalprice=' + this.state.totalprice + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation));
                     }
                     else {
-                        if (this.state.hassession == 'true') {
-                            window.location = '/service-sessions/?' + btoa(encodeURIComponent('serviceType=' + this.state.serviceType +
-                                '&categoryid=' + this.state.categoryid + '&servicetypeid=' + this.state.servicetypeid + 
-                                '&servicetypename=' + this.state.servicetypename + '&bookingid=' + this.state.bookingid +
-                                '&inhouse=' + this.state.inhouse + '&inclinic=' + this.state.inclinic + '&totalprice=' +
-                                finalPrice + '&bookingduration=' + this.state.areaDurationsSum + '&inclinicprice=' + this.state.inclinicprice +
-                                '&inhouseprice=' + this.state.inhouseprice));
-                        }
-                        else {
-                            window.location = '/duration-summary/?' + btoa(encodeURIComponent('bookingid=' + this.state.bookingid));
-                        }
+                        window.location = '/duration-summary/?' + btoa(encodeURIComponent('bookingid=' + this.state.bookingid +
+                            '&totalprice=' + this.state.totalprice + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation));
                     }
                 }
             });
@@ -323,6 +304,8 @@ export class DurationDateTime extends Component {
     }
 
     render() {
+
+
 
         var todayDate = new Date().toJSON().slice(0, 10).replace(/-/g, '-');
 
@@ -445,7 +428,7 @@ export class DurationDateTime extends Component {
                                         <div className="row">
                                             <div className="col-md-12">
                                                 <div className="text-center mb-3 checkoutBtn">
-                                                    <button className="btn btn-lg bg-orange text-white" type="submit">Checkout</button>
+                                                    <button className="btn btn-lg bg-orange text-white" type="submit">Next Page</button>
                                                 </div>
                                             </div>
                                         </div>

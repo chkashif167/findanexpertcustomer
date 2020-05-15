@@ -28,6 +28,7 @@ export class CustomerPaymentDetails extends Component {
                 return response.json();
             })
             .then(data => {
+                console.log(data);
                 this.setState({ apiResponse: data.statuscode });
                 if (this.state.apiResponse == '404') {
                     localStorage.removeItem('customercardtokenmakedefault');
@@ -181,7 +182,7 @@ export class CustomerPaymentDetails extends Component {
                                                                             Are you sure you want to Delete this Card?
                                                                             </div>
                                                                         <div className="col-md-12 d-flex text-right">
-                                                                            <form className="pt-3 w-100" onSubmit={this.handleSubmit}>
+                                                                            <form className="pt-3 w-100 paymentDeleteCardModal" onSubmit={this.handleSubmit}>
                                                                                 <button type="submit" className="st_sp_l_btn btn text-white bg-orange" name="remove"
                                                                                 >Remove</button>
                                                                             </form>

@@ -4,7 +4,7 @@ import toastr from 'toastr';
 
 export class TrainingCourses extends Component {
     displayName = TrainingCourses.name
-     
+
     constructor(props) {
         super(props);
 
@@ -17,8 +17,17 @@ export class TrainingCourses extends Component {
         const servicetypeid = params.get('servicetypeid');
         const servicetypename = params.get('servicetypename');
         localStorage.setItem('servicetypename', servicetypename);
+        const referralbonus = params.get('referralbonus');
+        localStorage.setItem('referralbonus', referralbonus);
+        const offer = params.get('offer');
+        localStorage.setItem('offer', offer);
+
+        let current_datetime = new Date()
+        let formatted_date = current_datetime.getFullYear() + "-0" + (current_datetime.getMonth() + 1) + "-" +
+            current_datetime.getDate()
 
         this.state = {
+            currentDate: formatted_date,
             categoryid: categoryid,
             serviceTypeName: servicetypename,
             servicetypeid: servicetypeid,
@@ -26,7 +35,12 @@ export class TrainingCourses extends Component {
             authToken: localStorage.getItem("customeraccesstoken"),
             cousedates: [],
             courseid: 0,
-            remainingSeats: 0
+            coursePrice: 0,
+            offer: localStorage.getItem('offer'),
+            studentDiscountCode: '',
+            discountDetails: [],
+            priceAfterDiscount: 0,
+            discountlist: []
         };
     }
 
@@ -46,46 +60,133 @@ export class TrainingCourses extends Component {
 
         this.setState({ courseid: e.target.id });
         this.setState({ addressid: e.target.className });
-        this.setState({ remainingSeats: e.target.getAttribute('rel') });
+        this.setState({ coursePrice: e.target.getAttribute('rel') });
+    }
+
+    handChangeDiscountCode(e) {
+        this.setState({ studentDiscountCode: e.target.value });
+    }
+
+    submitDiscountCode(e) {
+        e.preventDefault();
+        fetch(App.ApisBaseUrlV2 + '/api/Discount/getdiscountdetail?discountcode=' + this.state.studentDiscountCode + '&authtoken=' + this.state.authToken)
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                if (data.statuscode == 200) {
+                    if (data.detail.amount > 0 && this.state.coursePrice > data.detail.amount) {
+                        if (this.state.currentDate < data.detail.expirydate || this.state.currentDate == data.detail.expirydate) {
+                            if (data.detail.amount < data.detail.maxlimit || data.detail.amount == data.detail.maxlimit) {
+                                this.setState({ discountDetails: data.detail });
+                                var applyDiscount = this.state.coursePrice - data.detail.amount;
+                                this.setState({ priceAfterDiscount: applyDiscount });
+                            }
+                            else {
+                                this.setState({ discountDetails: data.detail });
+                                var applyDiscount = this.state.coursePrice - data.detail.maxlimit;
+                                this.setState({ priceAfterDiscount: applyDiscount });
+                            }
+                        }
+                        else {
+                            toastr["error"]("This " + data.detail.description + " is expired!");
+                        }
+                    }
+                    else {
+                        toastr["error"]("Course price must be greater than " + data.detail.description + " discount amount!");
+                    }
+                }
+                else {
+                    toastr["error"](data.message);
+                }
+            })
     }
 
     handleSubmit(e) {
         e.preventDefault();
 
-        if (this.state.remainingSeats > 0) {
-            const requestedParameters = {
-                method: 'POST',
-                headers: { 'content-Type': 'application/JSON' },
-                body: JSON.stringify({
-                    bookingid: localStorage.getItem('bookingId') == null ? 0 : parseInt(localStorage.getItem('bookingId')),
-                    categoryid: parseInt(this.state.categoryid),
-                    servicetypeid: parseInt(this.state.servicetypeid),
-                    addressid: parseInt(this.state.addressid),
-                    courseid: parseInt(this.state.courseid),
-                    deviceplatform: "web",
-                    devicename: "web",
-                    authtoken: this.state.authToken
-                })
-            };
+        const requestedParameters = {
+            method: 'POST',
+            headers: { 'content-Type': 'application/JSON' },
+            body: JSON.stringify({
+                bookingid: localStorage.getItem('bookingId') == null ? 0 : parseInt(localStorage.getItem('bookingId')),
+                categoryid: parseInt(this.state.categoryid),
+                servicetypeid: parseInt(this.state.servicetypeid),
+                addressid: parseInt(this.state.addressid),
+                courseid: parseInt(this.state.courseid),
+                deviceplatform: "web",
+                devicename: "web",
+                authtoken: this.state.authToken
+            })
+        };
 
-            console.log(requestedParameters);
+        console.log(requestedParameters);
 
-            fetch(App.ApisBaseUrlV2 + '/api/Booking/dotrainingbooking', requestedParameters)
-                .then(response => {
-                    return response.json();
-                })
-                .then(data => {
-                    console.log(data);
-                    if (data.statuscode == 200) {
-                        localStorage.setItem('bookingId', data.bookingid);
-                        window.location = '/course-summary/?' + btoa(encodeURIComponent('bookingid=' + data.bookingid));
+        fetch(App.ApisBaseUrlV2 + '/api/Booking/dotrainingbooking', requestedParameters)
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                if (data.statuscode == 200) {
+                    localStorage.setItem('bookingId', data.bookingid);
+
+                    //-- Save Booking Discount --//
+                    if (this.state.offer > '0') {
+                        var discountListKeysValues = {
+                            'discounttype': 'Offer',
+                            'discount': parseInt(this.state.offer)
+                        }
+                        this.state.discountlist.push(discountListKeysValues);
                     }
-                })
-        }
-        else {
-            toastr["error"]('This date has 0 seats. Please select another date.');
-        }
-        
+                    else if (this.state.discountDetails != '') {
+                        var discountListKeysValues = {
+                            'discounttype': 'Discount code',
+                            'discount': parseInt(this.state.discountDetails.amount)
+                        }
+                        this.state.discountlist.push(discountListKeysValues);
+                    }
+
+                    if (this.state.offer > '0' || this.state.discountDetails != '') {
+                        const bookingDiscountPrams = {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                bookingid: parseInt(data.bookingid),
+                                discountlist: this.state.discountlist,
+                                authtoken: this.state.authToken
+                            })
+                        };
+
+                        console.log(bookingDiscountPrams);
+
+                        fetch(App.ApisBaseUrlV2 + '/api/Booking/savebookingdiscount', bookingDiscountPrams)
+                            .then(response => {
+                                return response.json();
+                            })
+                            .then(response => {
+                                console.log(response);
+
+                            });
+                    }
+
+                    if (this.state.offer > '0') {
+                        var offerPercentage = this.state.coursePrice - this.state.offer * this.state.coursePrice / 100;
+                        window.location = '/course-summary/?' + btoa(encodeURIComponent('bookingid=' + data.bookingid +
+                            '&totalPrice=' + offerPercentage));
+                    }
+                    else if (this.state.discountDetails != '') {
+                        window.location = '/course-summary/?' + btoa(encodeURIComponent('bookingid=' + data.bookingid +
+                            '&totalPrice=' + this.state.priceAfterDiscount));
+                    }
+                    else {
+                        window.location = '/course-summary/?' + btoa(encodeURIComponent('bookingid=' + data.bookingid +
+                            '&totalPrice=' + this.state.coursePrice));
+                    }
+                }
+            })
+
     }
 
     render() {
@@ -117,14 +218,20 @@ export class TrainingCourses extends Component {
                                                 <label class="col-form-label pb-4">Select Dates</label>
                                                 <div className="genderPreferences">
 
-                                                    {this.state.cousedates.map(obj => 
+                                                    {this.state.cousedates.map(obj =>
                                                         <div class="form-group row mb-4">
 
                                                             <div class="col-sm-8">
                                                                 <div className="selectCourseRadio">
-                                                                    <input type="radio" name="from" id={obj.courseid} className={obj.addressid} 
-                                                                        rel={obj.totalseats - obj.bookedseats}
-                                                                        onChange={this.handleChangeSelectDate.bind(this)} />
+                                                                    {obj.totalseats - obj.bookedseats > 0 ?
+                                                                        <input type="radio" name="from" id={obj.courseid} className={obj.addressid}
+                                                                            rel={obj.price}
+                                                                            onChange={this.handleChangeSelectDate.bind(this)} />
+                                                                        : <input type="radio" name="from" id={obj.courseid} className={obj.addressid}
+                                                                            rel={obj.price}
+                                                                            disabled />
+                                                                    }
+
                                                                 </div>
                                                                 <div className="cardWrapWithShadow d-inline-block">
                                                                     <div className="selectCourseFields">
@@ -141,13 +248,72 @@ export class TrainingCourses extends Component {
                                                                             <input type="text" value={obj.todate} />
                                                                         </div>
                                                                     </div>
-                                                                    <p className="mt-3">At: {obj.trainingcenter}</p>
+                                                                    <p className="mt-3">At: <strong>{obj.trainingcenter}</strong></p>
+                                                                    <p>Price: <strong>{obj.price}</strong></p>
                                                                     <p>Total seats: <strong>{obj.totalseats - obj.bookedseats}</strong></p>
+                                                                    <p>Details: <strong>{obj.details}</strong></p>
                                                                 </div>
                                                             </div>
-
                                                         </div>
                                                     )}
+
+                                                    {this.state.offer == '0' ?
+                                                        this.state.courseid != '' ?
+                                                            <div className="col-md-12 text-center pt-5 pb-3">
+                                                                <p className="mb-3">
+                                                                    Have a Discount Code?
+                                                                        </p>
+                                                                <div className="reedemCode">
+                                                                    <span>
+                                                                        <input type="text" placeholder="Enter discount code" value={this.state.studentDiscountCode}
+                                                                            onChange={this.handChangeDiscountCode.bind(this)} />
+                                                                        {(this.state.studentDiscountCode != '') ?
+                                                                            <button className="btn bg-black text-white" type="button" onClick={this.submitDiscountCode.bind(this)}>Verify Code</button>
+                                                                            : <button className="btn bg-black text-white disabled" type="button">Verify Code</button>
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            : ''
+                                                        : ''
+                                                    }
+
+                                                    {this.state.courseid != '' ?
+                                                        this.state.discountDetails != '' ?
+                                                            <div class="col-md-12 pt-5 notes">
+                                                                <div class="col-md-12 cardWrapWithShadow bg-lite-gray">
+                                                                    <p className="lead">Actual Price
+                                                                        <span className="pl-5">£{this.state.coursePrice}</span>
+                                                                    </p>
+                                                                    <p className="lead">Discounted Price
+                                                                        <span className="pl-5">
+                                                                            £{this.state.priceAfterDiscount}
+                                                                            <small className="pl-3">
+                                                                                ({this.state.discountDetails.description})
+                                                                            </small>
+                                                                        </span>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            : this.state.offer > '0' ?
+                                                                <div class="col-md-12 pt-5 notes">
+                                                                    <div class="col-md-12 cardWrapWithShadow bg-lite-gray">
+                                                                        <p className="lead">Actual Price
+                                                                            <span className="pl-5">£{this.state.coursePrice}</span>
+                                                                        </p>
+                                                                        <p className="lead">Discounted Price
+                                                                                <span className="pl-5">
+                                                                                £{Math.round(this.state.coursePrice - this.state.offer * this.state.coursePrice / 100)}
+                                                                                <small className="pl-3">
+                                                                                    ({this.state.offer}% offer discount applied)
+                                                                                    </small>
+                                                                            </span>
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                                : ''
+                                                        : ''
+                                                    }
 
                                                 </div>
                                             </div>
@@ -156,11 +322,14 @@ export class TrainingCourses extends Component {
 
                                         <div className="row">
                                             <div className="col-md-12">
-
-                                                <div className="text-center mb-3 checkoutBtn">
-                                                    <button className="btn btn-lg bg-orange text-white" type="submit">Save And Continue</button>
-                                                </div>
-
+                                                {this.state.courseid != '' ?
+                                                    <div className="text-center mb-3 checkoutBtn">
+                                                        <button className="btn btn-lg bg-orange text-white" type="submit">Save And Continue</button>
+                                                    </div>
+                                                    : <div className="text-center mb-3 checkoutBtn">
+                                                        <button className="btn btn-lg bg-orange text-white" disabled>Save And Continue</button>
+                                                    </div>
+                                                }
                                             </div>
                                         </div>
 

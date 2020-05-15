@@ -23,6 +23,7 @@ export class UpdateCustomerAddress extends Component {
         const postalCode = params.get('postalcode');
         const addressId = params.get('addressid');
         const Address = params.get('address');
+        console.log(Address)
 
         this.state = {
             allAddresses: [],
@@ -121,7 +122,7 @@ export class UpdateCustomerAddress extends Component {
                                                 </div>
                                                 <div class="col">
                                                     <input type="text" name="postalcode" className="form-control validate" placeholder="Postalcode"
-                                                        value={this.state.address} onChange={this.handleChangeAddress.bind(this)} required />
+                                                        value={this.state.address.replace(/[\r\n]+/g, " ")} onChange={this.handleChangeAddress.bind(this)} required />
                                                 </div>
                                             </div>
 

@@ -79,25 +79,25 @@ export class CustomerCartBookings extends Component {
 
         if (this.state.totalIncompletedPages == '2') {
             var listItems = (<ul class="pagination">
-                    <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete'}>1</a></li>
-                    <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete'  + '&page=' + 2}>2</a></li>
-                </ul>
+                <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete'}>1</a></li>
+                <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete' + '&page=' + 2}>2</a></li>
+            </ul>
             );
         }
         else if (this.state.totalIncompletedPages == '3') {
             var listItems = (<ul class="pagination">
                 <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete'}>1</a></li>
-                <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete'  + '&page=' + 2}>2</a></li>
-                <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete'  + '&page=' + 3}>3</a></li>
+                <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete' + '&page=' + 2}>2</a></li>
+                <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete' + '&page=' + 3}>3</a></li>
             </ul>
             );
         }
         else if (this.state.totalIncompletedPages == '4') {
             var listItems = (<ul class="pagination">
                 <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete'}>1</a></li>
-                <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete'  + '&page=' + 2}>2</a></li>
-                <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete'  + '&page=' + 3}>3</a></li>
-                <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete'  + '&page=' + 4}>4</a></li>
+                <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete' + '&page=' + 2}>2</a></li>
+                <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete' + '&page=' + 3}>3</a></li>
+                <li class="page-item"><a class="page-link" href={"/customer-bookings/?" + 'booking=' + 'incomplete' + '&page=' + 4}>4</a></li>
             </ul>
             );
         }
@@ -115,7 +115,7 @@ export class CustomerCartBookings extends Component {
                             <div className="col-md-12">
                                 <div className="media booking-bx profileBox">
                                     {bookings.imagepath != '' ?
-                                        <img className="card-img-top" src={App.ApisImageBaseUrl + bookings.imagepath}
+                                        <img className="card-img-top" src={bookings.imagepath}
                                             alt={bookings.servicetypename} style={styles} />
                                         : <img className="card-img-top" src={placeholderSmall}
                                             alt='placeholder' style={styles} />
@@ -149,13 +149,13 @@ export class CustomerCartBookings extends Component {
                                             </span>
                                         </span>
                                     </div>
-                                
+
                                 </div>
                             </div>
 
                         </div>
                     )}
-                    
+
                     <div className="row pb-4">
                         <div className="col-md-12">
                             <nav aria-label="Page navigation" className="text-center">

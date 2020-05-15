@@ -26,7 +26,7 @@ export class QuestionAnswers extends Component {
         var decodedString = window.atob(search.replace('?', ''));
         const decodeParams = decodeURIComponent(decodedString);
         const params = new URLSearchParams(decodeParams);
-
+        const hasclickedfreeconsultation = params.get('hasclickedfreeconsultation');
         const serviceType = params.get('serviceType');
         const categoryid = params.get('categoryid');
         const servicetypeid = params.get('servicetypeid');
@@ -36,10 +36,10 @@ export class QuestionAnswers extends Component {
         const bookingid = params.get('bookingid');
         const bookingduration = params.get('bookingduration');
         const totalprice = params.get('totalprice');
+        console.log(totalprice);
         const postalcode = params.get('postalcode');
         const hassession = params.get('hassession');
-        const inclinicprice = params.get('inclinicprice');
-        const inhouseprice = params.get('inhouseprice');
+        const genderpreference = params.get('genderpreference');
 
         var lastVisitedUrl = window.document.referrer;
         var lastVisitedUrlArray = [];
@@ -52,14 +52,13 @@ export class QuestionAnswers extends Component {
             categoryid: categoryid,
             servicetypeid: servicetypeid,
             servicetypename: servicetypename,
+            genderpreference: genderpreference,
             inhouse: inhouse,
             inclinic: inclinic,
             bookingduration: bookingduration,
             bookingID: bookingid,
             totalprice: totalprice,
             hassession: hassession,
-            inclinicprice: inclinicprice,
-            inhouseprice: inhouseprice,
             authToken: localStorage.getItem("customeraccesstoken"),
             questionsList: [],
             firstQuestion: [],
@@ -70,7 +69,8 @@ export class QuestionAnswers extends Component {
             answerOptions: [],
             answersList: [],
             nextStepButton: false,
-            lastVisitedPage: lastVisitedPage
+            lastVisitedPage: lastVisitedPage,
+            hasclickedfreeconsultation: hasclickedfreeconsultation
         };
     }
 
@@ -113,7 +113,7 @@ export class QuestionAnswers extends Component {
                 document.getElementById(e.target.id).checked = false;
 
                 if (this.state.questionsList[i].questiontype == 'Finish') {
-                    this.setState({ nextStepButton: true});
+                    this.setState({ nextStepButton: true });
                 }
             }
         }
@@ -203,25 +203,20 @@ export class QuestionAnswers extends Component {
                         window.location = '/areas-date-time/?' + btoa(encodeURIComponent('serviceType=' + this.state.serviceType + '&bookingid=' + this.state.bookingID + '&totalprice='
                             + this.state.totalprice + '&categoryid=' + this.state.categoryid + '&servicetypeid=' + this.state.servicetypeid + '&postalcode=' + this.state.postalcode +
                             '&servicetypename=' + this.state.servicetypename + '&inhouse=' + this.state.inhouse + '&inclinic=' + this.state.inclinic
-                            + '&bookingduration=' + this.state.bookingduration));
+                            + '&bookingduration=' + this.state.bookingduration + '&totalprice=' + this.state.totalprice + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation));
                     }
                     else if (this.state.serviceType == 'hasduration') {
                         window.location = '/duration-date-time/?' + btoa(encodeURIComponent('serviceType=' + this.state.serviceType + '&categoryid=' + this.state.categoryid +
                             '&servicetypeid=' + this.state.servicetypeid + '&servicetypename=' + this.state.servicetypename + '&isinclinic=' + this.state.inclinic + '&postalcode=' + this.state.postalcode +
-                            '&isinhouse=' + this.state.inhouse + '&addressid=' + this.state.addressid + '&bookingduration=' + this.state.bookingduration + '&bookingid=' + 
-                            this.state.bookingID + '&inclinicprice=' + this.state.inclinicprice +
-                            '&inhouseprice=' + this.state.inhouseprice));
+                            '&isinhouse=' + this.state.inhouse + '&addressid=' + this.state.addressid + '&bookingduration=' + this.state.bookingduration + '&bookingid=' +
+                            this.state.bookingID + '&genderpreference=' + this.state.genderpreference + '&totalprice='
+                            + this.state.totalprice + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation));
                     }
                     else if (this.state.serviceType == 'isgeneric') {
-                        window.location = '/generic-date-time/?' + btoa(encodeURIComponent('serviceType=' + this.state.serviceType + '&categoryid=' + this.state.categoryid +
-                            '&servicetypeid=' + this.state.servicetypeid + '&servicetypename=' + this.state.servicetypename + '&isinclinic=' + this.state.inclinic + '&postalcode=' + this.state.postalcode +
-                            '&isinhouse=' + this.state.inhouse + '&addressid=' + this.state.addressid + '&bookingid=' + this.state.bookingID));
-                        if (this.state.hassession == 'true') {
-                            window.location = '/service-sessions/?' + btoa(encodeURIComponent('bookingid=' + this.state.bookingID ));
-                        }
-                        else {
-                            window.location = '/generic-summary/?' + btoa(encodeURIComponent('bookingid=' + this.state.bookingID));window.location = '/generic-summary/?' + btoa(encodeURIComponent('bookingid=' + this.state.bookingID));
-                        }
+                        window.location = '/generic-date-time/?' + btoa(encodeURIComponent('categoryid=' + this.state.categoryid + '&servicetypeid=' +
+                            this.state.servicetypeid + '&servicetypename=' + this.state.servicetypename + '&postalcode=' + this.state.postalcode +
+                            '&inhouse=' + this.state.inhouse + '&inclinic=' + this.state.inclinic + '&genderpreference=' + this.state.genderpreference +
+                            '&totalprice=' + this.state.totalprice + '&bookingid=' + this.state.bookingID + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation));
                     }
                 }
             });
@@ -229,25 +224,30 @@ export class QuestionAnswers extends Component {
 
     render() {
 
+
         return (
             <div id="MainPageWrapper">
 
-                <section className="bookingPage account-details section-padding">
+                <section className="bookingPage account-details pb-4">
                     <div className="services-wrapper">
-                        <div className="container">
-                            <div className="row pb-4">
-                                <div className="col-md-12">
-                                    <div className="row bookingPageTpRw bg-gray p-2">
-                                        <div className="col-md-6">
-                                            <p className="lead mb-0 service-name text-white">{this.state.servicetypename}</p>
+                        <div className="bookingPageTpRwWrapper">
+                            <div className="container">
+                                <div className="row">
+                                    <div className="col-md-12">
+                                        <div className="row bookingPageTpRw cardWrapWithShadow bg-half-white">
+                                            <div className="col-md-6">
+                                                <p className="lead mb-0 service-name">{this.state.servicetypename}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
+                        <div className="container">
                             {this.state.firstQuestion.map((obj, index) =>
                                 <div className="row">
-                                    <div className="col-md-12 bg-lite-gray mt-4">
+                                    <div className="col-md-12 mt-4">
                                         <div className="treatmentAreasTp">
                                             <p class="lead text-center pt-3 pb-3 m-0">{obj.question}</p>
                                         </div>
@@ -258,9 +258,12 @@ export class QuestionAnswers extends Component {
                                             {obj.questiontype.toLowerCase() == 'yes-no' || obj.questiontype.toLowerCase() == 'mcq-radio' ?
                                                 this.state.firstQuestion[index].optionslist.map((obj, index) =>
                                                     <div className="col-md-3 text-center">
-                                                        <input className={obj.nextquestionid} type="radio" name="question"
-                                                            id={obj.questionid} rel={obj.AnswerOption}
-                                                            onChange={this.handleChangeSelectedOption.bind(this)} /> <span className="questionOptions pl-5">{obj.AnswerOption}</span>
+                                                        <div className="answerWrapper">
+                                                            <input className={obj.nextquestionid} type="radio" name="question"
+                                                                id={obj.questionid} rel={obj.AnswerOption}
+                                                                onChange={this.handleChangeSelectedOption.bind(this)} />
+                                                            <span className="questionOptions pl-5">{obj.AnswerOption}</span>
+                                                        </div>
                                                     </div>
                                                 )
                                                 : obj.questiontype.toLowerCase() == 'description' || obj.questiontype.toLowerCase() == 'yes-no-description' ?

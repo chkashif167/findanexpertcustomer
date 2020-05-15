@@ -123,7 +123,7 @@ export class RegisterCustomer extends Component {
         e.preventDefault();
 
         if (this.state.password.length < 8) {
-            toastr["error"]('Please enter atleast 8 characters!');
+            toastr["error"]('Please enter at least 8 characters password');
         }
         else if (this.state.password != this.state.confirmpassword) {
             toastr["error"]("Passwords do not match!");

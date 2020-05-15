@@ -167,7 +167,7 @@ export class Watchlist extends Component {
                                                         }
 
                                                         {obj.imagepath != '' ?
-                                                            <img className="card-img-top" src={App.ApisImageBaseUrl + obj.imagepath}
+                                                            <img className="card-img-top" src={obj.imagepath}
                                                                 alt={obj.servicetypename} />
                                                             : <img className="card-img-top" src={placeholderSmall}
                                                                 alt='placeholder' />

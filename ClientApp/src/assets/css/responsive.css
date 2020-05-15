@@ -2,20 +2,31 @@
     Media Queries
 -----------------------*/
 
-/*@media only screen and (device-width : 375px) and (device-height : 812px) and (-webkit-device-pixel-ratio : 3) {
+@media only screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) {
+  /* .homeCirclesRw {
+    padding: 0 5px;
+    display: flex;
+  }
+  .homeCircles {
+    width: 30%;
+    height: auto;
+    padding: 0;
+    margin: auto;
+  } */
+  .main-menu#main-nav:nth-child(2) {
+  }
+}
 
-    .homeCirclesRw {
-        padding: 0 5px;
-        display: flex;
-    }
-    .homeCircles {
-        width: 30%;
-        height: auto;
-        padding: 0;
-        margin: auto;
-    }
-
-}*/
+@media only screen and (device-height: 375px) and (device-width: 812px) and (-webkit-device-pixel-ratio: 3) {
+  .main-menu#main-nav:nth-child(2) {
+    display: none !important;
+  }
+  #tp-mobile-right {
+    display: block !important;
+  }
+  #main-nav .col-md-2.text-right {
+  }
+}
 
 @media (max-width: 320px) {
   #search_form .search {
@@ -36,6 +47,7 @@
   #signIn .modal-dialog {
     max-width: 90%;
     width: 90%;
+    margin: auto;
   }
   .fullHeight {
     height: 500px;
@@ -55,15 +67,14 @@
     display: none;
   }
 
-    .navbar-light .navbar-toggler-icon {
-        background-image: url(https://1864597015.rsc.cdn77.org/images/StaticImages/menu-11.png) !important;
-        width: 1.2em;
-        height: 1.2em;
-    }
+  .navbar-light .navbar-toggler-icon {
+    background-image: url(https://lia.training/img/menu-11.png) !important;
+    width: 1.2em;
+    height: 1.2em;
+  }
 
   .topRw {
     width: -webkit-fill-available;
-    left: 4%;
     margin-bottom: 0;
     padding-left: 0;
     padding-right: 0;
@@ -104,7 +115,6 @@
 
   #search_form {
     width: 100% !important;
-    left: 4%;
     margin: auto;
     padding: 0 10px;
   }
@@ -242,7 +252,12 @@
   .modal-dialog {
     top: 15%;
     max-width: 90% !important;
+    margin: auto;
   }
+
+  .modal-dialog a.btn.bg-black.text-white.mt-3.ml-3 { margin-top:  0 !important;}
+  .paymentDeleteCardModal {
+    text-align: right !important;  }
 
   .termsConditionsWrap .col {
     display: flex;
@@ -904,6 +919,10 @@
 
   .service-decription {
     padding: 15px;
+    text-align: center;
+  }
+  .service-decription a.btn.btn-large.bg-orange.text-white {
+     float:none !important;
   }
 
   .bookNowBottom .btn {
@@ -1639,6 +1658,9 @@
     padding-top: 30px !important;
     padding-bottom: 30px;
   }
+  a.btn.bg-transparent.text-white.services-card-footer-btn {
+    color: black !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1650,6 +1672,9 @@
     left: 26%;
     top: 45%;
   }
+  .profileImage { width: 100%;}
+  .profileImage input.form-control-file.frm-field { width: 70%; float: left; }
+  .profileImage button.btn.bg-black.btn-block.text-white.z-depth-1a.w-auto { width: 30%; float: left; right: 0; font-size: 12px; }
 }
 
 @media (max-width: 380px) {
@@ -1673,12 +1698,8 @@
     /*left: 0%;*/
   }
 
-  #tp-mobile-right {
-    display: none !important;
-  }
-
   .navbar-collapse.yes-mobile {
-    display: none !important;
+    display: none;
   }
 
   .modal-dialog {
@@ -1732,8 +1753,8 @@
   /*trending now*/
 
   #trendingNow ul li {
-    height: 115px !important;
-    overflow: hidden;
+    /* height: 115px !important;
+    overflow: hidden; */
   }
 
   /*Home page Mobile Apps links section*/
@@ -1942,7 +1963,6 @@
     max-width: 98%;
     padding-left: 0;
     padding-right: 0;
-    left: 2%;
   }
 
   .navbar-brand {
@@ -1973,9 +1993,10 @@
 
   #search_form {
     flex: 100%;
-    max-width: 96%;
+    /* max-width: 96%; */
     padding: 0;
-    left: 4%;
+    margin: auto;
+    text-align: center;
   }
 
   #search_form form {
@@ -1984,6 +2005,7 @@
 
   #search_form .search {
     width: 100%;
+    height: 39px;
   }
 
   .btn.search-btn {
@@ -2000,7 +2022,7 @@
   }
 
   #tp-mobile-right {
-    display: block !important;
+    /* display: block !important; */
   }
 
   #navbarSupportedContent {
@@ -2467,7 +2489,7 @@
   }
 
   #main-nav .no-mobile .nav-item#userName {
-    padding-left: 1rem;
+    /* padding-left: 1rem; */
   }
 
   #main-nav .col-md-2.text-right {
@@ -2958,6 +2980,16 @@
     padding: 0;
     padding-right: 16px;
   }
+  #main-nav .no-mobile li.nav-item.help > a {
+    border: none;
+  }
+  #main-nav .no-mobile li#userName a {
+    padding-left: 10px;
+  }
+
+  #main-nav .no-mobile .nav-item {
+    padding: 1rem 1rem 0.5rem 1rem;
+  }
 
   #trendingNow ul li {
     height: 200px;
@@ -3087,7 +3119,153 @@
 }
 
 /* ----------- KN Responsive work ----------- */
-div#MainPageWrapper iframe {
-  width: 100%;
-  height: 200px;
+
+@media only screen and (max-width: 450px) {
+  div#MainPageWrapper iframe {
+    width: 100%;
+    height: 200px;
+  }
 }
+
+@media only screen and (min-width: 451px) and (max-width: 650px) {
+  div#MainPageWrapper iframe {
+    width: 100%;
+    height: 320px;
+  }
+}
+@media only screen and (min-width: 651px) and (max-width: 1000px) {
+  div#MainPageWrapper iframe {
+    width: 100%;
+    height: 380px;
+  }
+}
+
+@media only screen and (max-width: 640px) {
+  .banner_profile_picture {
+    top: 5px !important;
+  }
+  .banner_profile_picture img {
+    /* width: 60px; */
+    height: 60px;
+  }
+  .banner_profile_picture form button.w-auto {
+    position: relative;
+    right: 70px;
+  }
+  .profileImage label {
+    margin: 0;
+  }
+
+  #search-results .notFoundPage .text {padding: 0 5%;}
+
+  .inclinicInhouseWrapper .inclinicInhouse label, .inclinicInhouseWrapper .inclinicInhouse label { margin-left: 8px  !important}
+
+}
+
+@media only screen and (min-width: 641px) and (max-width: 1360px) {
+  .banner_profile_picture {
+    top: 5px !important;
+  }
+  .banner_profile_picture img {
+    /* width: 100px; */
+    height: 100px;
+  }
+}
+
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  #main-nav .col-md-8.centerItems.m-auto.text-center .nav-item a {
+    font-size: 11px !important;
+  }
+  .main-menu#main-nav:nth-child(2) {
+    display: block;
+  }
+  #tp-mobile-right {
+  }
+  .navbar-toggler {
+  }
+}
+
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  #main-nav .col-md-8.centerItems.m-auto.text-center .nav-item a {
+    font-size: 11px !important;
+  }
+  #main-nav .no-mobile .nav-item > a {
+    padding-right: 0px !important;
+  }
+
+  .navbar-toggler {
+    margin-right: 14px;
+  }
+  .main-menu#main-nav:nth-child(2) {
+    display: block;
+  }
+}
+
+@media only screen and (device-width: 768px) and (device-height: 1024px) {
+  .navbar-collapse.yes-mobile {
+    display: block;
+  }
+  .main-menu#main-nav:nth-child(2) {
+    display: none;
+  }
+}
+
+@media only screen and (device-height: 768px) and (device-width: 1024px) {
+  .nav-right-items {
+    display: none;
+  }
+  #main-nav .col-md-2.text-right {
+    display: block;
+  }
+}
+
+@media only screen and (device-width: 1024px) and (device-height: 1366px) and (orientation: portrait) {
+  body {
+  }
+  .nav-right-items {
+    display: none;
+  }
+  #main-nav .col-md-2.text-right {
+    display: block;
+  }
+}
+
+@media only screen and (device-width: 1366px) and (device-height: 1024px) and (orientation: landscape) {
+  body {
+  }
+  #tp-mobile-right .nav-right-items {
+    display: none !important;
+  }
+
+  #main-nav .col-md-2.text-right {
+    display: block;
+  }
+}
+
+@media only screen and (max-device-height:420px){
+#stickysidebarButton a { bottom: 40%;}
+}
+
+
+.notificationsCount {
+      /* float: left; */
+      padding: 2px;
+      color: black;
+      font-size: 8px;
+      position: absolute;
+      left: 16px;
+      width: auto;
+      background: white;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      text-align: center;
+      top: 7px;
+}
+
+form.bookingPageForm  .addressesWraper  {padding-top: 1rem!important; }
+
+.inclinicInhouseWrapper .inclinicInhouse label, .inclinicInhouseWrapper .inclinicInhouse label { margin-left: 5px  }
+
+.iWantMyServiceOn { margin-top:  20px;}
+.bookingPageForm label {  padding-bottom: 10px !important;}

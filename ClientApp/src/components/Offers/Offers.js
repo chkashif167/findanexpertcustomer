@@ -12,7 +12,7 @@ export class Offers extends Component {
 
         this.state = { allOffers: [], statusCode: '', loading: true, removed: false };
 
-        fetch(App.ApisBaseUrlV2 + '/api/ServiceType/getalloffersV2?pagenumber=1&pagesize=50')
+        fetch(App.ApisBaseUrlV2 + '/api/ServiceType/getalloffersV2?apikey=XzUzTFQzUS5AUEkudkAyX5OG8eakYoY5XY39bxPGnvU=&pagenumber=1&pagesize=50')
             .then(response => {
                 console.log(response);
                 return response.json();
@@ -64,7 +64,7 @@ export class Offers extends Component {
                                                 <div className="offers mb-4">
                                                     {offer.imagepath != '' ?
                                                         <img className="img-fluid rounded"
-                                                            src={App.ApisImageBaseUrl + offer.imagepath}
+                                                            src={offer.imagepath}
                                                             alt={offer.servicetypename} />
                                                         : <img className="img-fluid rounded"
                                                             src={placeholderSmall}
@@ -73,9 +73,9 @@ export class Offers extends Component {
 
                                                     <div className="content">
                                                         <h5>{offer.servicetypename}</h5>
-                                                        <p className="discount"><strong className="text-red">{offer.offer}%</strong> Off</p>
+                                                        <p className="discount"><strong className="text-red">{offer.offerpercentage}%</strong> Off</p>
                                                         <p className="inlineItems mr-4">&#163; <del className="text-muted">{offer.lowestprice}</del></p>
-                                                        <p className="inlineItems"><strong className="text-red">&#163; {offer.lowestprice - offer.offer / 100 * offer.lowestprice}</strong></p>
+                                                        <p className="inlineItems"><strong className="text-red">&#163; {Math.round(offer.lowestprice - offer.offerpercentage / 100 * offer.lowestprice)}</strong></p>
                                                     </div>
                                                 </div>
                                             </Link>
@@ -104,7 +104,7 @@ export class Offers extends Component {
                                                     <div class="inlineItems One">
                                                         {offer.imagepath != '' ?
                                                             <img className="img-fluid rounded"
-                                                                src={App.ApisImageBaseUrl + offer.imagepath}
+                                                                src={offer.imagepath}
                                                                 alt={offer.servicetypename} />
                                                             : <img className="img-fluid rounded"
                                                                 src={placeholderSmall}
@@ -112,11 +112,11 @@ export class Offers extends Component {
                                                         }
                                                     </div>
                                                     <div class="inlineItems Two">
-                                                        <p><strong className="text-red discount">{offer.offerdiscount}%</strong> Off</p>
+                                                        <p><strong className="text-red discount">{offer.offerpercentage}%</strong> Off</p>
                                                         <p>&#163; <del className="text-muted">{offer.lowestprice}</del>
                                                             <span className="discountedPrice">
                                                                 &#163; <strong className="text-red">
-                                                                    {offer.lowestprice - offer.offerdiscount / 100 * offer.lowestprice}
+                                                                    {Math.round(offer.lowestprice - offer.offerpercentage / 100 * offer.lowestprice)}
                                                                 </strong>
                                                             </span>
                                                         </p>

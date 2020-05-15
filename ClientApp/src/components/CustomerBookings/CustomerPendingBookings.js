@@ -86,32 +86,32 @@ export class CustomerPendingBookings extends Component {
 
         var pageItem = '';
         for (var i = 0; i < this.state.totalPages; i++) {
-            
+
             pageItem += (<li class="page-item"><a class="page-link" href="/customer-obj">{i}</a></li>);
-            
+
         }
 
         if (this.state.totalPages == '2') {
             var listItems = (<ul class="pagination">
-                    <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending'  + '&page=' + 1}>1</a></li>
-                    <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending'  + '&page=' + 2}>2</a></li>
-                </ul>
+                <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending' + '&page=' + 1}>1</a></li>
+                <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending' + '&page=' + 2}>2</a></li>
+            </ul>
             );
         }
         else if (this.state.totalPages == '3') {
             var listItems = (<ul class="pagination">
                 <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending'}>1</a></li>
-                <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending'  + '&page=' + 2}>2</a></li>
-                <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending'  + '&page=' + 3}>3</a></li>
+                <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending' + '&page=' + 2}>2</a></li>
+                <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending' + '&page=' + 3}>3</a></li>
             </ul>
             );
         }
         else if (this.state.totalPages == '4') {
             var listItems = (<ul class="pagination">
                 <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending'}>1</a></li>
-                <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending'  + '&page=' + 2}>2</a></li>
-                <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending'  + '&page=' + 3}>3</a></li>
-                <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending'  + '&page=' + 4}>4</a></li>
+                <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending' + '&page=' + 2}>2</a></li>
+                <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending' + '&page=' + 3}>3</a></li>
+                <li class="page-item"><a class="page-link" href={"/customer-obj/?" + 'booking=' + 'pending' + '&page=' + 4}>4</a></li>
             </ul>
             );
         }
@@ -120,7 +120,7 @@ export class CustomerPendingBookings extends Component {
         }
 
         return (
-  
+
             <div>
 
                 <div className="no-mobile">
@@ -130,7 +130,7 @@ export class CustomerPendingBookings extends Component {
                             <div className="col-md-12">
                                 <div className="media booking-bx profileBox">
                                     {obj.typeimagepath != '' ?
-                                        <img className="card-img-top" src={App.ApisImageBaseUrl + obj.typeimagepath}
+                                        <img className="card-img-top" src={obj.typeimagepath}
                                             alt={obj.servicetypename} style={styles} />
                                         : <img className="card-img-top" src={placeholderSmall}
                                             alt='placeholder' style={styles} />
@@ -140,7 +140,7 @@ export class CustomerPendingBookings extends Component {
                                         <span className="inline-items">
                                             <div className="float-left ml-4 mt-3">
                                                 <h5 className="mt-0">{obj.providername}</h5>
-                                                
+
                                                 {obj.reviewpoints == 5 ?
                                                     <ul className="list-unstyled list-inline ratings mb-0 pl-2">
                                                         <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
@@ -150,28 +150,28 @@ export class CustomerPendingBookings extends Component {
                                                         <li className="list-inline-item m-0 p-0 5th" ><i className="fas fa-star amber-text"></i></li>
                                                     </ul>
                                                     : obj.reviewpoints == 4 ?
-                                                        <ul className="list-unstyled list-inline ratings mb-0 pl-2">    
+                                                        <ul className="list-unstyled list-inline ratings mb-0 pl-2">
                                                             <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
                                                             <li className="list-inline-item m-0 p-0 2nd" ><i className="fas fa-star amber-text"></i></li>
                                                             <li className="list-inline-item m-0 p-0 3rd" ><i className="fas fa-star amber-text"></i></li>
                                                             <li className="list-inline-item m-0 p-0 4th" ><i className="fas fa-star amber-text"></i></li>
                                                         </ul>
-                                                    : obj.reviewpoints == 3 ?
-                                                        <ul className="list-unstyled list-inline ratings mb-0 pl-2">    
-                                                            <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
-                                                            <li className="list-inline-item m-0 p-0 2nd" ><i className="fas fa-star amber-text"></i></li>
-                                                            <li className="list-inline-item m-0 p-0 3rd" ><i className="fas fa-star amber-text"></i></li>
-                                                        </ul>
-                                                    : obj.reviewpoints == 2 ?
-                                                        <ul className="list-unstyled list-inline ratings mb-0 pl-2">    
-                                                            <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
-                                                            <li className="list-inline-item m-0 p-0 2nd" ><i className="fas fa-star amber-text"></i></li>
-                                                        </ul>
-                                                    : obj.reviewpoints == 1 ?
-                                                        <ul className="list-unstyled list-inline ratings mb-0 pl-2">    
-                                                            <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
-                                                        </ul>
-                                                    : 'No Review.'
+                                                        : obj.reviewpoints == 3 ?
+                                                            <ul className="list-unstyled list-inline ratings mb-0 pl-2">
+                                                                <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
+                                                                <li className="list-inline-item m-0 p-0 2nd" ><i className="fas fa-star amber-text"></i></li>
+                                                                <li className="list-inline-item m-0 p-0 3rd" ><i className="fas fa-star amber-text"></i></li>
+                                                            </ul>
+                                                            : obj.reviewpoints == 2 ?
+                                                                <ul className="list-unstyled list-inline ratings mb-0 pl-2">
+                                                                    <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
+                                                                    <li className="list-inline-item m-0 p-0 2nd" ><i className="fas fa-star amber-text"></i></li>
+                                                                </ul>
+                                                                : obj.reviewpoints == 1 ?
+                                                                    <ul className="list-unstyled list-inline ratings mb-0 pl-2">
+                                                                        <li className="list-inline-item m-0 p-0 1st" ><i className="fas fa-star amber-text"> </i></li>
+                                                                    </ul>
+                                                                    : 'No Review.'
                                                 }
                                             </div>
 
@@ -202,7 +202,7 @@ export class CustomerPendingBookings extends Component {
                                             </span>
                                         </span>
                                     </div>
-                                
+
                                 </div>
                             </div>
 
@@ -243,7 +243,7 @@ export class CustomerPendingBookings extends Component {
                                                     <li class="list-inline-item m-0 p-0 5th"><i class="fas fa-star amber-text"></i></li>
                                                 </ul>
                                             </div>
-                                            <span class="date-time mt-3 ml-4 float-left">
+                                            <span class="date-time mt-3 float-left">
                                                 <div className="links pb-2">
                                                     {obj.istraining == false ?
                                                         <a className="pr-2" href={'/edit-customer-booking/?' + btoa(encodeURIComponent('bookingid=' + obj.bookingid +

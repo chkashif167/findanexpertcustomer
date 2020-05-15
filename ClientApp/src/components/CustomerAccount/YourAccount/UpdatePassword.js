@@ -17,10 +17,11 @@ export class CustomerUpdatePassword extends Component {
         const search = window.location.search;
         const params = new URLSearchParams(search);
         const Token = params.get('token');
-        
+
         this.state = {
             checkresetpasswordcodeResponse: '', resetcode: '', password: '', customerupdatepassresponse: '',
-            email: '', showResendBtn: false, resendCodeStatus: '', confirmPassword: '', update: false, submitCodeButtonId: '', showModal: '', showMessage: ''
+            email: '', showResendBtn: false, resendCodeStatus: '', confirmPassword: '',
+            update: false, submitCodeButtonId: '', showModal: '', showMessage: ''
         };
 
         this.handleChangeResetcode = this.handleChangeResetcode.bind(this);
@@ -30,32 +31,8 @@ export class CustomerUpdatePassword extends Component {
         this.handlePasswordSubmit = this.handlePasswordSubmit.bind(this);
     }
 
-    sendResetCode() {
-
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                resetcode: this.state.resetcode
-            })
-        };
-        console.log(requestOptions);
-
-        return fetch(App.ApisBaseUrlV2 + '/api/Reset/checkresetpasswordcodeV2', requestOptions)
-            .then(response => {
-                return response.json();
-            })
-            .then(data => {
-                console.log(data);
-                this.setState({ checkresetpasswordcodeResponse: data.statuscode });
-                if (data.statuscode == 200) {
-                    this.setState({ showModal: 'show', showMessage: data.message });
-                }
-                else {
-                    this.setState({ showResendBtn: true });
-                    toastr['error'](data.message);
-                }
-            });
+    showResendCodeFeild() {
+        this.setState({ showResendBtn: true });
     }
 
     handleChangeEmail(e) {
@@ -82,11 +59,39 @@ export class CustomerUpdatePassword extends Component {
                 if (data.statuscode == 200) {
                     toastr["success"](data.message);
                     setTimeout(function () {
-                        window.location = "/activate-your-account";
-                    }, 1000);
+                        window.location = "/update-password";
+                    }, 3000);
                     //this.setState({ modalMessage: data.message, showModal: 'show' });
                 } else {
                     toastr["error"](data.message);
+                }
+            });
+    }
+
+    sendResetCode() {
+
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                resetcode: this.state.resetcode
+            })
+        };
+        console.log(requestOptions);
+
+        return fetch(App.ApisBaseUrlV2 + '/api/Reset/checkresetpasswordcodeV2', requestOptions)
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                this.setState({ checkresetpasswordcodeResponse: data.statuscode });
+                if (data.statuscode == 200) {
+                    this.setState({ showModal: 'show', showMessage: data.message });
+                }
+                else {
+                    //this.setState({ showResendBtn: true });
+                    toastr['error'](data.message);
                 }
             });
     }
@@ -134,8 +139,13 @@ export class CustomerUpdatePassword extends Component {
 
     handleCodeSubmit(e) {
         e.preventDefault();
-        const { resetcode } = this.state;
-        this.sendResetCode(this.state.resetcode);
+        if (this.state.resetcode.length < 4 || this.state.resetcode.length > 4) {
+            toastr["error"]('Please enter 4 digits code.');
+        }
+        else {
+            const { resetcode } = this.state;
+            this.sendResetCode(this.state.resetcode);
+        }
     }
 
     handlePasswordSubmit(e) {
@@ -183,7 +193,6 @@ export class CustomerUpdatePassword extends Component {
                                             <div className="md-form pb-4">
                                                 <input type="password" className="form-control validate" name="password" value={this.state.password} onChange={this.handleChangePassword} placeholder="Enter new password" required />
                                             </div>
-
                                             <div className="md-form pb-4">
                                                 <input type="password" className="form-control validate" name="confirmpassword" value={this.state.confirmPassword} onChange={this.handleChangeConfirmPassword} placeholder="Confirm new password" required />
                                             </div>
@@ -198,15 +207,21 @@ export class CustomerUpdatePassword extends Component {
                                                     <input type="email" className="form-control validate" name="email" value={this.state.email}
                                                         onChange={this.handleChangeEmail.bind(this)} placeholder="Your email" required />
                                                 </div>
-                                                <button className="btn bg-black text-white">Resend Code</button>
+                                                <div className="text-center mb-4">
+                                                    <button id="sendCode" type="submit" className="btn bg-orange text-white btn-block"
+                                                        onClick={this.submitResetCode}>Update</button>
+                                                </div>
                                             </form>
                                             : <form onSubmit={this.handleCodeSubmit} className="signinRegisterWrap p-5">
                                                 <div className="md-form pb-3 text-center">
                                                     <h3>Change Password</h3>
                                                 </div>
-
                                                 <div className="md-form pb-4">
-                                                    <input type="number" className="form-control validate" name="resetcode" value={this.state.resetcode} onChange={this.handleChangeResetcode} placeholder="Enter code" required />
+                                                    <input type="number" id="enterCode" className="form-control validate" name="resetcode" value={this.state.resetcode} onChange={this.handleChangeResetcode} placeholder="Enter code" required />
+                                                </div>
+                                                <div className="md-form pb-3 text-right">
+                                                    <input type="button" className="btn bg-transparent p-0"
+                                                        onClick={this.showResendCodeFeild.bind(this)} value="Resend code" />
                                                 </div>
                                                 <div className="text-center mb-4">
                                                     <button id="sendCode" type="submit" className="btn bg-orange text-white btn-block"

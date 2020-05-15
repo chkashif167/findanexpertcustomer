@@ -30,6 +30,7 @@ export class AreasDateTime extends Component {
         const bookingduration = params.get('bookingduration');
         const totalprice = params.get('totalprice');
         const isfreeconsultation = params.get('isfreeconsultation');
+        const hasclickedfreeconsultation = params.get('hasclickedfreeconsultation');
 
 
         this.state = {
@@ -63,7 +64,8 @@ export class AreasDateTime extends Component {
             availibilityTimeSlots: [],
             availableDate: '',
             availableTime: '',
-            loader: false
+            loader: false,
+            hasclickedfreeconsultation: hasclickedfreeconsultation
         };
 
         this.handleChangeBookingDate = this.handleChangeBookingDate.bind(this);
@@ -476,11 +478,11 @@ export class AreasDateTime extends Component {
                 if (response.statuscode == 200) {
                     if (this.state.isfreeconsultation == 'true') {
                         window.location = '/areas-summary/?' + btoa(encodeURIComponent('bookingid=' + this.state.bookingid +
-                            '&totalprice=' + this.state.totalprice + '&isfreeconsultation=' + this.state.isfreeconsultation));
+                            '&totalprice=' + this.state.totalprice + '&isfreeconsultation=' + this.state.isfreeconsultation + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation));
                     }
                     else {
                         window.location = '/areas-summary/?' + btoa(encodeURIComponent('bookingid=' + this.state.bookingid +
-                            '&totalprice=' + this.state.totalprice));
+                            '&totalprice=' + this.state.totalprice + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation));
                     }
                 }
             });
@@ -507,6 +509,7 @@ export class AreasDateTime extends Component {
     }
 
     render() {
+
 
         var todayDate = new Date().toJSON().slice(0, 10).replace(/-/g, '-');
 
@@ -657,15 +660,15 @@ export class AreasDateTime extends Component {
 
                                     <form onSubmit={this.handleSubmit.bind(this)} className="bookingPageForm">
 
-                                        <div className="row pt-4 pb-4">
-                                            {localStorage.getItem('requiredgenderpreference') == 'true' ?
+                                        {localStorage.getItem('requiredgenderpreference') == 'true' ?
+                                            <div className="row pt-4 pb-4">
                                                 <div className="col-md-12 genderPreferenceWrap">
                                                     <label class="col-form-label pb-4">I want my Service Provider to be</label>
                                                     <div className="cardWrapWithShadow genderPreferences">
-                                                        <div class="form-group row">
+                                                        <div class="form-group row m-0">
 
-                                                            <div class="col-sm-4">
-                                                                <div class="form-check">
+                                                            <div class="col-sm-4 pl-0 m-0">
+                                                                <div class="form-check pl-3">
                                                                     <input type="checkbox" name="genderPreference" id="genderPreference1" value="male"
                                                                         onChange={this.handleChangeGenderPreference.bind(this)} />
                                                                     <label class="form-check-label" for="genderPreference1">
@@ -687,9 +690,9 @@ export class AreasDateTime extends Component {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                : ''
-                                            }
-                                        </div>
+                                            </div>
+                                            : ''
+                                        }
 
                                         <div className="row pt-4 pb-4">
 
@@ -701,7 +704,7 @@ export class AreasDateTime extends Component {
                                                     : <label class="addressLabel col-form-label pb-4">Service venue will be</label>
                                                 }
 
-                                                {this.state.inclinic == 'true' & this.state.inhouse == 'false' ?
+                                                {this.state.inclinic == 'true' && this.state.inhouse == 'false' ?
                                                     ''
                                                     : <div class=" text-right pb-4 addressTitle">
                                                         <a class="btn btn-transparent text-dark" onClick={this.handleAddNewAddress.bind(this)}>
@@ -720,7 +723,7 @@ export class AreasDateTime extends Component {
                                         </div>
 
                                         <div className="row pt-4 pb-4">
-                                            <label class="col-form-label pb-4 pl-3">I want my service on</label>
+                                            <label class="col-form-label pb-4 pl-3 iWantMyServiceOn">I want my service on</label>
                                             {this.state.availability == false && this.state.availableslots != null ?
                                                 <div className="col-md-12 cardWrapWithShadow availibitySlots">
                                                     <div className="col-md-6 pt-3">
@@ -807,10 +810,8 @@ export class AreasDateTime extends Component {
                                         <div className="row">
                                             <div className="col-md-12">
                                                 <div className="text-center mb-3 checkoutBtn">
-                                                    { this.state.bookingdate != '' && this.state.bookingtime != ''
-                                                        && this.state.addresscheck != '' &&
-                                                        localStorage.getItem('requiredgenderpreference') == 'true' ?
-                                                        this.state.genderpreference != '' : this.state.genderpreference == '' ?
+                                                    {this.state.bookingdate != '' && this.state.bookingtime != ''
+                                                        && this.state.addresscheck != '' ?
                                                         <button className="btn btn-lg bg-orange text-white"
                                                             type="submit">Next Step</button>
                                                         : ''

@@ -78,11 +78,13 @@ export class Home extends Component {
 
         <div className="yes-mobile">
           <iframe
-            src="https://player.vimeo.com/video/391233884"
+            src="https://player.vimeo.com/video/391233884?autoplay=1&loop=1&autopause=0"
             width="auto"
             height="auto"
             frameborder="0"
-            allow="autoplay"
+            allow="autoplay; fullscreen"
+            allowfullscreen
+            autoplay="true"
           ></iframe>
         </div>
 

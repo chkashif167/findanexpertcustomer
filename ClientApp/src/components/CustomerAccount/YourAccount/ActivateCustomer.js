@@ -54,7 +54,7 @@ export class ActivateCustomer extends Component {
                     //this.setState({ modalMessage: this.state.confirmed.message, showModal: 'show' });
                 }
                 else {
-                    this.setState({ showResendBtn: true });
+                    //this.setState({ showResendBtn: true });
                     toastr["error"](this.state.confirmed.message);
                 }
             });

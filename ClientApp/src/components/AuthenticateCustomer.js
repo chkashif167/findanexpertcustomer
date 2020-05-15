@@ -39,7 +39,8 @@ export class AuthenticateCustomer extends Component {
                 email: email,
                 password: password,
                 deviceid: "web",
-                deviceplatform: "web"
+                deviceplatform: "web",
+                apikey: "XzUzTFQzUS5AUEkudkAyX5OG8eakYoY5XY39bxPGnvU="
             })
         };
 
@@ -115,7 +116,7 @@ export class AuthenticateCustomer extends Component {
         e.preventDefault();
 
         if (this.state.password.length < 8) {
-            toastr["error"]('Please enter atleast 8 characters.');
+            toastr["error"]('Please enter at least 8 characters password');
         }
         else {
             const { email, password } = this.state;

@@ -24,21 +24,18 @@ export class GenericDateTime extends Component {
         const decodeParams = decodeURIComponent(decodedString);
         const params = new URLSearchParams(decodeParams);
 
+        const hasclickedfreeconsultation = params.get('hasclickedfreeconsultation');
         const serviceType = params.get('serviceType');
         const categoryid = params.get('categoryid');
         const servicetypeid = params.get('servicetypeid');
         const servicetypename = params.get('servicetypename');
-        const addressid = params.get('addressid');
         const postalcode = params.get('postalcode');
-        const isinhouse = params.get('isinhouse');
-        const isinclinic = params.get('isinclinic');
+        const isinhouse = params.get('inhouse');
+        const isinclinic = params.get('inclinic');
         const bookingid = params.get('bookingid');
         const genderpreference = params.get('genderpreference');
-        const hasquestions = params.get('hasquestions');
-        const hassession = params.get('hassession');
-        const isfreeconsultation = params.get('isfreeconsultation');
-        const inclinicprice = params.get('inclinicprice');
-        const inhouseprice = params.get('inhouseprice');
+        const totalprice = params.get('totalprice');
+        console.log(totalprice);
 
         this.state = {
             serviceType: serviceType,
@@ -46,20 +43,13 @@ export class GenericDateTime extends Component {
             serviceTypeName: servicetypename,
             categoryid: categoryid,
             servicetypeid: servicetypeid,
-            addressid: addressid,
             postalcode: postalcode,
             inhouse: isinhouse,
             inclinic: isinclinic,
-            hasquestions: hasquestions,
-            hassession: hassession,
-            isfreeconsultation: isfreeconsultation,
-            inclinicprice: inclinicprice,
-            inhouseprice: inhouseprice,
             genderPreference: genderpreference,
+            totalprice: totalprice,
             bookingid: bookingid,
             authtoken: localStorage.getItem("customeraccesstoken"),
-            bookingdate: '',
-            bookingtime: '',
             notes: '',
             freeavailableslots: [],
             availability: true,
@@ -68,7 +58,8 @@ export class GenericDateTime extends Component {
             availibilityTimeSlots: [],
             availableDate: '',
             availableTime: '',
-            loader: false
+            loader: false,
+            hasclickedfreeconsultation: hasclickedfreeconsultation
         };
 
         this.handleChangeBookingDate = this.handleChangeBookingDate.bind(this);
@@ -252,41 +243,15 @@ export class GenericDateTime extends Component {
         this.setState({ notes: e.target.value });
     }
 
-    doGenericBooking(categoryid, servicetypeid, bookingdate, bookingtime, addressid, inhouse, inclinic, genderPreference,
-        notes, authtoken) {
-
-        if (this.state.inhouse == 'true') {
-            var inhouseVal = true;
-            var inclinicVal = false;
-        }
-        else {
-            var inhouseVal = false;
-            var inclinicVal = true;
-        }
-
-        if (this.state.inhouse == 'true') {
-            var finalPrice = this.state.inhouseprice;
-        }
-        else {
-            var finalPrice = this.state.inclinicprice;
-        }
+    saveGenericBookingDateTime(bookingid, bookingdate, bookingtime, notes, authtoken) {
 
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                bookingid: localStorage.getItem('bookingId') == null ? 0 : parseInt(localStorage.getItem('bookingId')),
-                categoryid: parseInt(categoryid),
-                servicetypeid: parseInt(servicetypeid),
+                bookingid: parseInt(this.state.bookingid),
                 bookingdate: localStorage.getItem('bookingdate'),
                 bookingtime: bookingtime,
-                addressid: parseInt(addressid),
-                isinhouse: inhouseVal,
-                isinclinic: inclinicVal,
-                genderPreference: genderPreference,
-                isfreeconsultation: this.state.isfreeconsultation != null ? this.state.isfreeconsultation == 'true' ? true : false : false,
-                deviceplatform: 'web',
-                devicename: 'web',
                 notes: notes,
                 authtoken: authtoken
             })
@@ -294,37 +259,18 @@ export class GenericDateTime extends Component {
 
         console.log(requestOptions);
 
-        return fetch(App.ApisBaseUrlV2 + '/api/Booking/dogenericbookingV2', requestOptions)
+        return fetch(App.ApisBaseUrlV2 + '/api/Booking/savegenericbookingdatetime', requestOptions)
             .then(response => {
                 return response.json();
             })
             .then(data => {
+                console.log(data);
                 if (data.statuscode == 200) {
-                    localStorage.setItem('bookingId', data.bookingid);
-
-                    if (this.state.isfreeconsultation == 'true') {
-                        window.location = '/generic-summary/?' + btoa(encodeURIComponent('bookingid=' + data.bookingid + 
-                            '&isfreeconsultation=' + this.state.isfreeconsultation));
-                    }
-                    else {
-                        if (this.state.hasquestions == 'true') {
-                            window.location = '/questions-answers/?' + btoa(encodeURIComponent('serviceType=' + this.state.serviceType + '&categoryid=' + this.state.categoryid + '&servicetypeid=' + this.state.servicetypeid +
-                                '&servicetypename=' + this.state.serviceTypeName + '&bookingid=' + data.bookingid +
-                                '&inhouse=' + this.state.inhouse + '&inclinic=' + this.state.inclinic + '&totalprice=' +
-                                finalPrice + '&bookingduration=' + this.state.areaDurationsSum + '&inclinicprice=' + this.state.inclinicprice +
-                                '&inhouseprice=' + this.state.inhouseprice));
-                        }
-                        else if (this.state.hassession == 'true') {
-                            window.location = '/service-sessions/?' + btoa(encodeURIComponent('serviceType=' + this.state.serviceType + '&categoryid=' + this.state.categoryid + '&servicetypeid=' + this.state.servicetypeid +
-                                '&servicetypename=' + this.state.serviceTypeName + '&bookingid=' + data.bookingid +
-                                '&inhouse=' + this.state.inhouse + '&inclinic=' + this.state.inclinic + '&totalprice=' +
-                                finalPrice + '&bookingduration=' + this.state.areaDurationsSum + '&inclinicprice=' + this.state.inclinicprice +
-                                '&inhouseprice=' + this.state.inhouseprice));
-                        }
-                        else {
-                            window.location = '/generic-summary/?' + btoa(encodeURIComponent('bookingid=' + data.bookingid));
-                        }
-                    }
+                    window.location = '/generic-summary/?' + btoa(encodeURIComponent('bookingid=' + data.bookingid
+                        + '&totalprice=' + this.state.totalprice + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation + '&hasclickedfreeconsultation=' + this.state.hasclickedfreeconsultation));
+                }
+                else {
+                    toastr['error'](data.message);
                 }
             });
     }
@@ -333,19 +279,15 @@ export class GenericDateTime extends Component {
         e.preventDefault();
         if (this.state.availibilityResponse == 200) {
             if (this.state.availableslots != '' && this.state.availableslots != null) {
-                const { categoryid, servicetypeid, bookingdate, bookingtime, addressid, isinhouse, isinclinic, genderPreference,
-                    notes, authtoken } = this.state;
-                this.doGenericBooking(categoryid, servicetypeid, bookingdate, bookingtime, addressid, isinhouse, isinclinic,
-                    genderPreference, notes, authtoken);
+                const { bookingid, bookingdate, bookingtime, notes, authtoken } = this.state;
+                this.saveGenericBookingDateTime(bookingid, bookingdate, bookingtime, notes, authtoken);
             }
             else if (this.state.freeavailableslots.availability == false && this.state.freeavailableslots.availableSlots == null) {
                 toastr["error"]('Unfortunately no service provider available at ' + localStorage.getItem('bookingdate') + '.Please choose an alternative Date & Time.');
             }
             else if (this.state.availability == true) {
-                const { categoryid, servicetypeid, bookingdate, bookingtime, addressid, isinhouse, isinclinic, genderPreference,
-                    notes, authtoken } = this.state;
-                this.doGenericBooking(categoryid, servicetypeid, bookingdate, bookingtime, addressid, isinhouse, isinclinic,
-                    genderPreference, notes, authtoken);
+                const { bookingid, bookingdate, bookingtime, notes, authtoken } = this.state;
+                this.saveGenericBookingDateTime(bookingid, bookingdate, bookingtime, notes, authtoken);
             }
         }
         else {
@@ -354,6 +296,7 @@ export class GenericDateTime extends Component {
     }
 
     render() {
+
 
         var todayDate = new Date().toJSON().slice(0, 10).replace(/-/g, '-');
 
@@ -476,7 +419,12 @@ export class GenericDateTime extends Component {
                                         <div className="row">
                                             <div className="col-md-12">
                                                 <div className="text-center mb-3 checkoutBtn">
-                                                    <button className="btn btn-lg bg-orange text-white" type="submit">Checkout</button>
+                                                    {this.state.bookingdate != '' && this.state.bookingtime != '' ?
+                                                        <button className="btn btn-lg bg-orange text-white"
+                                                            type="submit">Next Page</button>
+                                                        : <button className="btn btn-lg bg-orange text-white"
+                                                            disabled>Next Page</button>
+                                                    }
                                                 </div>
                                             </div>
                                         </div>

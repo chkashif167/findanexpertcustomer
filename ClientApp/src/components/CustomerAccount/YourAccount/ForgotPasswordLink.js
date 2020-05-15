@@ -42,7 +42,6 @@ export class CustomerForgotPassword extends Component {
                 this.setState({ forgorpasswordresponse: response.statuscode });
                 if (response.statuscode == 200) {
                     this.setState({ emailSent: response, submitted: true });
-
                     if (this.state.forgorpasswordresponse == 200) {
                         this.setState({ showModal: 'show', modalMessage: response.message });
                     }

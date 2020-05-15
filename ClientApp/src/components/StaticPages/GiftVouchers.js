@@ -41,7 +41,12 @@ export class GiftVouchers extends Component {
             })
             .then(data => {
                 console.log(data);
-                this.setState({ allGiftVouchers: data.vouchercardlist });
+                if (data.statuscode == 200) {
+                    this.setState({ allGiftVouchers: data.vouchercardlist });
+                }
+                else {
+                    this.state.allGiftVouchers = [];
+                }
             })
             .catch((error) => {
                 this.state.allGiftVouchers = [];
@@ -145,7 +150,7 @@ export class GiftVouchers extends Component {
 
                     if (data.statuscode == 200) {
 
-                        this.setState({ modalMessage: "Thank You! voucher purchased successfully!", showModal: 'show' });
+                        this.setState({ modalMessage: "Thank You! Voucher purchased successfully!", showModal: 'show' });
                     }
                     else if (data.statuscode == 400) {
 
@@ -218,27 +223,27 @@ export class GiftVouchers extends Component {
                         <div class="container">
 
                             <div class="row">
-                                {this.state.allGiftVouchers.map(gifts =>
-                                    <div class="col-md-4 mb-4 giftVoucherWrapper">
-
-                                        <div className="content" style={bg} >
-                                            <div class="voucherContent">
-                                                <p class="card-text mb-0 amount">£ <span><strong>{gifts}</strong></span></p>
-                                                <div className="btnWrap">
-                                                    {localStorage.getItem('isprofilecompleted') == 'false' ?
-                                                        <button className="btn btn-default bg-black text-white" 
-                                                            onClick={this.getVoucherAmount.bind(this)}>Purchase Now</button>
-                                                        : <button className="btn btn-default bg-black text-white" data-toggle="modal"
-                                                            data-target="#giftsVoucherModal" id={gifts}
-                                                            onClick={this.getVoucherAmount.bind(this)}>Purchase Now</button>
-                                                    }
-                                                    
+                                {this.state.allGiftVouchers != '' ?
+                                    this.state.allGiftVouchers.map(gifts =>
+                                        <div class="col-md-4 mb-4 giftVoucherWrapper">
+                                            <div className="content" style={bg} >
+                                                <div class="voucherContent">
+                                                    <p class="card-text mb-0 amount">£ <span><strong>{gifts}</strong></span></p>
+                                                    <div className="btnWrap">
+                                                        {localStorage.getItem('isprofilecompleted') == 'false' ?
+                                                            <button className="btn btn-default bg-black text-white" 
+                                                                onClick={this.getVoucherAmount.bind(this)}>Purchase Now</button>
+                                                            : <button className="btn btn-default bg-black text-white" data-toggle="modal"
+                                                                data-target="#giftsVoucherModal" id={gifts}
+                                                                onClick={this.getVoucherAmount.bind(this)}>Purchase Now</button>
+                                                        }
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-
-                                    </div>
-                                )}
+                                    )
+                                    :''
+                                }
                             </div>
 
                             <div className="row">

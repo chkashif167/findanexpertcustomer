@@ -37,6 +37,8 @@ export class EditCustomerProfile extends Component {
             genderpreference: localStorage.getItem('genderpreference'), gender: localStorage.getItem('gender'),
             dob: customerDOB, authtoken: localStorage.getItem('customeraccesstoken'), showModal: '', modalMessage: ''
         };
+
+        // alert(this.state.genderpreference)
     }
 
     handleChangeFirstname(e) {
@@ -51,9 +53,35 @@ export class EditCustomerProfile extends Component {
         this.setState({ mobile: e.target.value });
     }
 
-    handleChangeGenderPreference(e) {
-        this.setState({ genderpreference: e.target.value });
-    }
+    handleChangeGenderPreference = e => {
+        const { genderpreference } = this.state;
+        const { value } = e.target;
+
+
+        console.log(genderpreference, value);
+
+        if (
+            (genderpreference == "male" && value == "male") ||
+            (genderpreference == "female" && value == "female")
+        ) {
+            this.setState({ genderpreference: null });
+        } else if (!genderpreference) {
+            this.setState({ genderpreference: value });
+        }
+        else if (genderpreference == 0) {
+            this.setState({ genderpreference: value });
+        }
+        else if (
+            (genderpreference == "male" && value == "female") ||
+            (genderpreference == "female" && value == "male")
+        ) {
+            this.setState({ genderpreference: "both" });
+        } else if (genderpreference == "both" && value == "female") {
+            this.setState({ genderpreference: "male" });
+        } else if (genderpreference == "both" && value == "male") {
+            this.setState({ genderpreference: "female" });
+        }
+    };
 
     handleChangeGender(e) {
         this.setState({ gender: e.target.value });
@@ -104,7 +132,9 @@ export class EditCustomerProfile extends Component {
                 genderpreference: genderpreference,
                 gender: gender,
                 dob: dob,
-                authtoken: authtoken
+                authtoken: authtoken,
+                postalcode: 'xyz',
+                address: 'abc'
             })
         };
 
@@ -136,7 +166,7 @@ export class EditCustomerProfile extends Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        if (this.state.mobile.length < 8 || this.state.mobile.length > 11) {
+        if (this.state.mobile.length < 11 || this.state.mobile.length > 11) {
             toastr["error"]('Please enter valid phone number');
         }
         else if (this.state.genderpreference == '' || this.state.genderpreference == '0' || this.state.dob == '') {
@@ -196,7 +226,7 @@ export class EditCustomerProfile extends Component {
 
                     <div className="md-form pb-3">
 
-                        {localStorage.getItem('genderpreference') != null ?
+                        {/* {localStorage.getItem('genderpreference') != null ?
                             localStorage.getItem('genderpreference') == 'Male' ?
                                 <select className="form-control my-1 mr-sm-2 frm-field" value={this.state.genderpreference}
                                     onChange={this.handleChangeGenderPreference.bind(this)} required>
@@ -221,7 +251,33 @@ export class EditCustomerProfile extends Component {
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                             </select>
-                        }
+                        } */}
+
+                        <label style={{ fontWeight: "normal" }} className="pr-5">
+                            <input
+                                type="checkbox"
+                                onChange={this.handleChangeGenderPreference}
+                                value="male"
+                                checked={
+                                    this.state.genderpreference === "male" ||
+                                    this.state.genderpreference === "both"
+                                }
+                            />
+              Male
+            </label>
+
+                        <label style={{ fontWeight: "normal" }}>
+                            <input
+                                type="checkbox"
+                                onChange={this.handleChangeGenderPreference}
+                                value="female"
+                                checked={
+                                    this.state.genderpreference === "female" ||
+                                    this.state.genderpreference === "both"
+                                }
+                            />
+              Female
+            </label>
 
                     </div>
 
@@ -276,6 +332,7 @@ export class EditCustomerProfile extends Component {
                             format={'YYYY-MM-DD'}
                             showBorder
                             onChange={(date) => this.handleChangeDOB(date)}
+                            maxDate={'2002-01-01'}
                             placeholder={'Select a date'} />
                     </div>
 
