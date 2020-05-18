@@ -1,7 +1,7 @@
-﻿import React, { Component } from "react";
+﻿﻿import React, { Component } from "react";
 import App from "../../App";
-import { Link } from "react-router-dom";
 import toastr from "toastr";
+import HTMLReactParser from "html-react-parser";
 import headerporfileicon from "../../assets/img/icons/header-porfile-icon.png";
 import placeholderLarge from "../../assets/img/placeholderLarge.jpg";
 
@@ -11,8 +11,6 @@ var iconstyle = {
 };
 
 export class ServiceSingle extends Component {
-  displayName = ServiceSingle.name;
-
   constructor(props) {
     super(props);
     localStorage.removeItem("bookingId");
@@ -76,6 +74,8 @@ export class ServiceSingle extends Component {
       referralbonus: 0,
       hassubtypeGeneric: false,
       hassubtypeArea: false,
+      hasSubTypeTraining: false,
+      hasSubTypeDuration: false,
     };
 
     //fetch(App.ApisBaseUrl + '/api/ServiceType/getservicetypedetail?servicetypename=' + serviceTypeName)
@@ -185,7 +185,7 @@ export class ServiceSingle extends Component {
       })
       .then((data) => {
         console.log(data);
-        this.setState({ allServices: data.searchedlist });
+        this.setState({ allServices: data.searchedlist || [] });
 
         for (var i = 0; i < this.state.allServices.length; i++) {
           var serviceTypeName = this.state.allServices[
@@ -237,11 +237,12 @@ export class ServiceSingle extends Component {
         return response.json();
       })
       .then((data) => {
-        console.log(data);
         const tempArr = this.state.serviceDetails;
         tempArr.push(data);
-        this.setState({ serviceDetails: tempArr });
-        console.log(this.state.serviceDetails);
+        this.setState({
+          serviceDetails: tempArr,
+          hasSubTypeDuration: data.hassubtype,
+        });
 
         if (this.state.serviceDetails[0].fbgraphcode != "") {
           /*---Facebook open graph content---*/
@@ -551,10 +552,12 @@ export class ServiceSingle extends Component {
         return response.json();
       })
       .then((data) => {
-        console.log(data);
         const tempArr = this.state.serviceDetails;
         tempArr.push(data.course);
-        this.setState({ serviceDetails: tempArr });
+        this.setState({
+          serviceDetails: tempArr,
+          hasSubTypeTraining: data.course.hassubtype,
+        });
 
         if (this.state.serviceDetails[0].fbgraphcode != "") {
           /*---Facebook open graph content---*/
@@ -704,8 +707,204 @@ export class ServiceSingle extends Component {
     this.addWatchlist(categoryid, servicetypeid);
   }
 
+  buttons = (value) => {
+    let url = this.urlTypes();
+    const bookingUrl = this.bookingUrl(url, value);
+    let consultantUrl = null;
+    const buttons = ["Book Now"];
+    if (value.isfreeconsultation) {
+      buttons.push("Free Consultation");
+      consultantUrl = this.consultantUrl(url, value);
+    }
+    return buttons.map((button, key) => {
+      const classes = ["btn", "text-white", "services-card-footer-btn"];
+      let url = null;
+      if (button === "Book Now") {
+        classes.push("bg-orange");
+        url = bookingUrl;
+      }
+      if (button === "Free Consultation") {
+        classes.push("bg-transparent");
+        url = consultantUrl;
+      }
+      return (
+        <a className={classes.join(" ")} href={url} key={key}>
+          {button}
+        </a>
+      );
+    });
+  };
+
+  urlTypes = () => {
+    const {
+      hassubtypeGeneric,
+      isgeneric,
+      hasduration,
+      istraining,
+      hasSubTypeTraining,
+      hasarea,
+      hassubtypeArea,
+    } = this.state;
+    let url = null;
+    if (isgeneric) {
+      url = hassubtypeGeneric
+        ? "/generic-booking-subtype/"
+        : "/generic-booking/";
+    } else if (hasduration) {
+      url = "/service-durations/";
+    } else if (istraining) {
+      url = hasSubTypeTraining
+        ? "/select-course-date-subtype/"
+        : "/select-course-date/";
+    } else if (hasarea) {
+      url = hassubtypeArea ? "/service-areas-subtype/" : "/service-areas/";
+    }
+    return url;
+  };
+
+  bookingUrl = (url, value) => {
+    const { isgeneric, hasduration, istraining, hasarea } = this.state;
+    let bookingParams = [];
+    if (value.isfreeconsultation) {
+      bookingParams.push("hasclickedfreeconsultation=false");
+    }
+    let keysFromState = [
+      "categoryid",
+      "servicetypename",
+      "servicetypeid",
+      "referralbonus",
+    ];
+    let keysForBooking = [];
+
+    if (isgeneric) {
+      bookingParams.push("serviceType=isgeneric");
+      keysFromState.push("hasfreetreatment");
+      keysForBooking = [
+        "inhouse",
+        "inclinic",
+        "inclinicprice",
+        "inhouseprice",
+        "requiredgenderpreference",
+        "offer",
+        "isfreeconsultation",
+        "hasquestions",
+        "hassession",
+      ];
+    } else if (hasduration) {
+      bookingParams.push("serviceType=hasduration");
+      keysForBooking = [
+        "inhouse",
+        "inclinic",
+        "requiredgenderpreference",
+        "isfreeconsultation",
+        "hasquestions",
+        "hassession",
+        "offer",
+      ];
+    } else if (istraining) {
+      bookingParams.push("serviceType=istraining");
+      keysForBooking = ["requiredgenderpreference", "offer"];
+    } else if (hasarea) {
+      bookingParams.push("serviceType=hasarea");
+      keysForBooking = [
+        "inhouse",
+        "inclinic",
+        "hasquestions",
+        "hassession",
+        "requiredgenderpreference",
+        "offer",
+        "isfreeconsultation",
+      ];
+    }
+    keysFromState.forEach((key) => {
+      const txt = `${key}=${this.state[key]}`;
+      bookingParams.push(txt);
+    });
+    keysForBooking.forEach((val) => {
+      const txt = `${val}=${value[val]}`;
+      bookingParams.push(txt);
+    });
+    const encodedParams = btoa(encodeURIComponent(bookingParams.join("&")));
+    return `${url}?${encodedParams}`;
+  };
+
+  consultantUrl = (url, value) => {
+    const { isgeneric, hasduration, istraining, hasarea } = this.state;
+    let consultantParams = [];
+    let keysFromState = [
+      "categoryid",
+      "servicetypename",
+      "servicetypeid",
+      "referralbonus",
+    ];
+    let keysForConsultant = [];
+
+    if (isgeneric) {
+      consultantParams.push("serviceType=isgeneric");
+      consultantParams.push("hasclickedfreeconsultation=true");
+      keysFromState.push("hasfreetreatment");
+      keysForConsultant = [
+        "inhouse",
+        "inclinic",
+        "inclinicprice",
+        "inhouseprice",
+        "requiredgenderpreference",
+        "offer",
+        "isfreeconsultation",
+      ];
+    } else if (hasduration) {
+      consultantParams.push("serviceType=hasduration");
+      consultantParams.push("hasclickedfreeconsultation=true");
+      keysForConsultant = [
+        "inhouse",
+        "inclinic",
+        "requiredgenderpreference",
+        "isfreeconsultation",
+      ];
+    } else if (istraining) {
+      consultantParams.push("serviceType=istraining");
+      consultantParams.push("hasclickedfreeconsultation=true");
+      keysForConsultant = ["requiredgenderpreference", "offer"];
+    } else if (hasarea) {
+      consultantParams.push("serviceType=hasarea");
+      consultantParams.push("hasclickedfreeconsultation=true");
+      keysForConsultant = [
+        "inhouse",
+        "inclinic",
+        "isfreeconsultation",
+        "requiredgenderpreference",
+        "offer",
+      ];
+    }
+    keysFromState.forEach((key) => {
+      const txt = `${key}=${this.state[key]}`;
+      consultantParams.push(txt);
+    });
+    keysForConsultant.forEach((val) => {
+      const txt = `${val}=${value[val]}`;
+      consultantParams.push(txt);
+    });
+    const encodedParams = btoa(encodeURIComponent(consultantParams.join("&")));
+    return `${url}?${encodedParams}`;
+  };
+
+  getButtons = (value) => {
+    const isprofilecompleted = localStorage.getItem("isprofilecompleted");
+    if (isprofilecompleted === "false") {
+      return (
+        <button
+          class="btn bg-orange text-white services-card-footer-btn"
+          onClick={this.getNotification}
+        >
+          Book Now
+        </button>
+      );
+    }
+    return this.buttons(value);
+  };
+
   render() {
-    console.log(this.state.hassubtypeGeneric);
+    console.log(this.state);
     var metaTitle = this.state.serviceDetails.map((obj) => obj.metatitle);
     var metaDescription = this.state.serviceDetails.map(
       (obj) => obj.metadescription
@@ -737,578 +936,249 @@ export class ServiceSingle extends Component {
 
     var serviceIndex = localStorage.getItem("searchedServiceIndex");
 
+    const appLinksMedia = (
+      <section class="pb-4" id="st_app_links_media">
+        <div class="services-wrapper">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-2 info-col pr-0 noMobile">
+                <div class="info-box section-bg-light" id="col_1">
+                  <img
+                    className="img-responsive m-auto"
+                    src={App.StaticImagesUrl + "info_1.png"}
+                    alt="expert-mobile"
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-6 info-col noMobile">
+                <div class="info-box section-bg-light" id="col_2">
+                  <p class="lead text">
+                    Want all the <strong>Services </strong>
+                    at your fingertips ? <strong>Download</strong> the Expert
+                    app <strong>Now</strong>
+                  </p>
+                </div>
+              </div>
+
+              <div class="col-md-4 info-col pl-0">
+                <div class="info-box section-bg-light no-mobile" id="col_3">
+                  <div className="content">
+                    <a
+                      href="https://apps.apple.com/us/app/find-an-expert/id1468090965?ls=1"
+                      target="_blank"
+                    >
+                      <img
+                        className="appleImage"
+                        src={App.StaticImagesUrl + "appleStore.png"}
+                        alt=""
+                        width="100%"
+                      />
+                    </a>
+                    <a
+                      href="https://play.google.com/store/apps/details?id=com.findanexpert"
+                      target="_blank"
+                    >
+                      <img
+                        className="gooleImage"
+                        src={App.StaticImagesUrl + "googleStore.png"}
+                        alt=""
+                        width="100%"
+                      />
+                    </a>
+                  </div>
+                </div>
+
+                <div
+                  class="info-box serviceSingle section-bg-light yes-mobile"
+                  id="col_3"
+                >
+                  <h3>Download the expert app now</h3>
+                  <div>
+                    <a
+                      href="https://apps.apple.com/us/app/find-an-expert/id1468090965?ls=1"
+                      target="_blank"
+                    >
+                      <img
+                        className="appleImage"
+                        src={App.StaticImagesUrl + "appleStore.png"}
+                        alt=""
+                        width="100%"
+                      />
+                    </a>
+                    <a
+                      href="https://play.google.com/store/apps/details?id=com.findanexpert"
+                      target="_blank"
+                    >
+                      <img
+                        className="gooleImage"
+                        src={App.StaticImagesUrl + "googleStore.png"}
+                        alt=""
+                        width="100%"
+                      />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+
     if (localStorage.getItem("customeraccesstoken") != null) {
       var serviceContent = (
         <div>
-          {this.state.serviceDetails.map((obj, index) => (
-            <div>
-              <section className="serviceDetail section-padding serviceDetailTpWrap">
-                <div className="overlay"></div>
-                <div className="services-wrapper">
-                  <div className="container">
-                    <div className="row">
-                      <div className="col-md-6">
-                        <div className="serviceTitle yes-mobile">
-                          <h1 className="section-title m-0 m-0">
-                            <strong>{this.state.servicetypename}</strong>
-                          </h1>
-                          {obj.isfreeconsultation == false ? (
-                            <p>
-                              <span class="price pr-3">From </span>£
-                              <span class="">
-                                {obj.offer > 0
-                                  ? Math.round(
-                                      obj.lowestprice -
-                                        (obj.offer * obj.lowestprice) / 100
-                                    )
-                                  : obj.lowestprice}
-                              </span>
-                            </p>
-                          ) : (
-                            <p>Free Consultation</p>
-                          )}
+          {this.state.serviceDetails.map((obj, index) => {
+            const getButtons = this.getButtons(obj);
+            return (
+              <div key={index}>
+                <section className="serviceDetail section-padding serviceDetailTpWrap">
+                  <div className="overlay"></div>
+                  <div className="services-wrapper">
+                    <div className="container">
+                      <div className="row">
+                        <div className="col-md-6">
+                          <div className="serviceTitle yes-mobile">
+                            <h1 className="section-title m-0 m-0">
+                              <strong>{this.state.servicetypename}</strong>
+                            </h1>
+                            {obj.isfreeconsultation == false ? (
+                              <p>
+                                <span class="price pr-3">From </span>£
+                                <span class="">
+                                  {obj.offer > 0
+                                    ? Math.round(
+                                        obj.lowestprice -
+                                          (obj.offer * obj.lowestprice) / 100
+                                      )
+                                    : obj.lowestprice}
+                                </span>
+                              </p>
+                            ) : (
+                              <p>Free Consultation</p>
+                            )}
+                          </div>
+                          <div>
+                            <div className="contentWrapper">
+                              {obj.hasoffer == true && obj.offer > 0 ? (
+                                <div class="ribbon ribbonTopLeft">
+                                  <span>{obj.offer}% OFF</span>
+                                </div>
+                              ) : null}
+                              {this.state.imagepath != "" ? (
+                                <img
+                                  className="img-fluid rounded"
+                                  src={this.state.imagepath}
+                                  alt={this.state.servicetypename}
+                                />
+                              ) : (
+                                <img
+                                  className="img-fluid rounded"
+                                  src={placeholderLarge}
+                                  alt={this.state.servicetypename}
+                                />
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="contentWrapper">
-                            {obj.hasoffer == true && obj.offer > 0 ? (
-                              <div class="ribbon ribbonTopLeft">
-                                <span>{obj.offer}% OFF</span>
+
+                        <div className="col-md-6 pr-0">
+                          <div className="serviceDetailTpRight">
+                            <div className="no-mobile">
+                              <div className="serviceTitle">
+                                <h1 className="section-title m-0">
+                                  <strong>{this.state.servicetypename}</strong>
+                                </h1>
+                                {obj.isfreeconsultation == false ? (
+                                  <p>
+                                    <span class="price pr-3">From </span>£
+                                    <span class="">
+                                      {obj.offer > 0
+                                        ? Math.round(
+                                            obj.lowestprice -
+                                              (obj.offer * obj.lowestprice) /
+                                                100
+                                          )
+                                        : obj.lowestprice}
+                                    </span>
+                                  </p>
+                                ) : (
+                                  <p>Free Consultation</p>
+                                )}
                               </div>
-                            ) : (
-                              ""
-                            )}
-                            {this.state.imagepath != "" ? (
-                              <img
-                                className="img-fluid rounded"
-                                src={this.state.imagepath}
-                                alt={this.state.servicetypename}
-                              ></img>
-                            ) : (
-                              <img
-                                className="img-fluid rounded"
-                                src={placeholderLarge}
-                                alt={this.state.servicetypename}
-                              ></img>
-                            )}
+                            </div>
+                            <div className="buttonWrap">
+                              <div className="bookNow">{getButtons}</div>
+                              <form
+                                onSubmit={this.handleSubmit.bind(this)}
+                                className="no-mobile"
+                              >
+                                <div className="text-center ">
+                                  <button
+                                    type="submit"
+                                    className="btn bg-transparent text-white pr-0"
+                                    id={obj.serviceid}
+                                    onClick={this.getServiceID}
+                                  >
+                                    <i class="fas fa-heart"></i> Add to
+                                    watchlist
+                                  </button>
+                                </div>
+                              </form>
+                            </div>
+                            <div className="btmImages no-mobile">
+                              <a
+                                href="https://play.google.com/store/apps/details?id=com.findanexpert"
+                                target="_blank"
+                              >
+                                <img
+                                  src={App.StaticImagesUrl + "googleStore.png"}
+                                  alt=""
+                                />
+                              </a>
+                              <a
+                                href="https://apps.apple.com/us/app/find-an-expert/id1468090965?ls=1"
+                                target="_blank"
+                              >
+                                <img
+                                  src={App.StaticImagesUrl + "appleStore.png"}
+                                  alt=""
+                                />
+                              </a>
+                            </div>
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </section>
 
-                      <div className="col-md-6 pr-0">
-                        <div className="serviceDetailTpRight">
-                          <div className="no-mobile">
-                            <div className="serviceTitle">
-                              <h1 className="section-title m-0">
-                                <strong>{this.state.servicetypename}</strong>
-                              </h1>
-                              {obj.isfreeconsultation == false ? (
-                                <p>
-                                  <span class="price pr-3">From </span>£
-                                  <span class="">
-                                    {obj.offer > 0
-                                      ? Math.round(
-                                          obj.lowestprice -
-                                            (obj.offer * obj.lowestprice) / 100
-                                        )
-                                      : obj.lowestprice}
-                                  </span>
-                                </p>
-                              ) : (
-                                <p>Free Consultation</p>
-                              )}
-                            </div>
+                <section className="serviceDetail section-padding p-0">
+                  <div className="services-wrapper">
+                    <div className="container">
+                      <div className="row pb-4">
+                        <div className="col-md-12">
+                          <div className="service-decription">
+                            <div>{HTMLReactParser(obj.description)}</div>
                           </div>
-                          <div className="buttonWrap">
-                            <div className="bookNow">
-                              {localStorage.getItem("isprofilecompleted") ==
-                              "false" ? (
-                                <button
-                                  class="btn bg-orange text-white services-card-footer-btn"
-                                  onClick={this.getNotification}
-                                >
-                                  Book Now
-                                </button>
-                              ) : obj.isfreeconsultation == true ? (
-                                this.state.hasduration == true ? (
-                                  <div>
-                                    <a
-                                      href={
-                                        "/service-durations/?" +
-                                        btoa(
-                                          encodeURIComponent(
-                                            "serviceType=hasduration" +
-                                              "&categoryid=" +
-                                              this.state.categoryid +
-                                              "&servicetypename=" +
-                                              this.state.servicetypename +
-                                              "&servicetypeid=" +
-                                              this.state.servicetypeid +
-                                              "&inhouse=" +
-                                              obj.inhouse +
-                                              "&inclinic=" +
-                                              obj.inclinic +
-                                              "&hasquestions=" +
-                                              obj.hasquestions +
-                                              "&hassession=" +
-                                              obj.hassession +
-                                              "&requiredgenderpreference=" +
-                                              obj.requiredgenderpreference +
-                                              "&referralbonus=" +
-                                              this.state.referralbonus +
-                                              "&offer=" +
-                                              obj.offer +
-                                              "&isfreeconsultation=" +
-                                              obj.isfreeconsultation +
-                                              "&hasclickedfreeconsultation=false"
-                                          )
-                                        )
-                                      }
-                                      class="btn bg-orange text-white services-card-footer-btn"
-                                    >
-                                      Book Now
-                                    </a>
-                                    <a
-                                      href={
-                                        "/service-durations/?" +
-                                        btoa(
-                                          encodeURIComponent(
-                                            "serviceType=hasduration" +
-                                              "&categoryid=" +
-                                              this.state.categoryid +
-                                              "&servicetypename=" +
-                                              this.state.servicetypename +
-                                              "&servicetypeid=" +
-                                              this.state.servicetypeid +
-                                              "&inhouse=" +
-                                              obj.inhouse +
-                                              "&inclinic=" +
-                                              obj.inclinic +
-                                              "&isfreeconsultation=" +
-                                              obj.isfreeconsultation +
-                                              "&requiredgenderpreference=" +
-                                              obj.requiredgenderpreference +
-                                              "&hasclickedfreeconsultation=true"
-                                          )
-                                        )
-                                      }
-                                      class="btn bg-transparent text-white services-card-footer-btn"
-                                    >
-                                      Free Consultation
-                                    </a>
-                                  </div>
-                                ) : this.state.isgeneric == true ? (
-                                  this.state.hassubtypeGeneric == false ? (
-                                    <div>
-                                      <a
-                                        href={
-                                          "/generic-booking-subtype/?" +
-                                          btoa(
-                                            encodeURIComponent(
-                                              "serviceType=isgeneric" +
-                                                "&categoryid=" +
-                                                this.state.categoryid +
-                                                "&servicetypename=" +
-                                                this.state.servicetypename +
-                                                "&servicetypeid=" +
-                                                this.state.servicetypeid +
-                                                "&hasfreetreatment=" +
-                                                this.state.hasfreetreatment +
-                                                "&inhouse=" +
-                                                obj.inhouse +
-                                                "&inclinic=" +
-                                                obj.inclinic +
-                                                "&hasquestions=" +
-                                                obj.hasquestions +
-                                                "&hassession=" +
-                                                obj.hassession +
-                                                "&inclinicprice=" +
-                                                obj.inclinicprice +
-                                                "&inhouseprice=" +
-                                                obj.inhouseprice +
-                                                "&requiredgenderpreference=" +
-                                                obj.requiredgenderpreference +
-                                                "&referralbonus=" +
-                                                this.state.referralbonus +
-                                                "&offer=" +
-                                                obj.offer +
-                                                "&isfreeconsultation=" +
-                                                obj.isfreeconsultation +
-                                                obj.isfreeconsultation +
-                                                "&hasclickedfreeconsultation=false"
-                                            )
-                                          )
-                                        }
-                                        class="btn bg-orange text-white services-card-footer-btn"
-                                      >
-                                        Book Now rrrrrrrrrrrrrr
-                                      </a>
-                                      <a
-                                        href={
-                                          "/generic-booking-subtype?" +
-                                          btoa(
-                                            encodeURIComponent(
-                                              "serviceType=isgeneric" +
-                                                "&categoryid=" +
-                                                this.state.categoryid +
-                                                "&servicetypename=" +
-                                                this.state.servicetypename +
-                                                "&servicetypeid=" +
-                                                this.state.servicetypeid +
-                                                "&hasfreetreatment=" +
-                                                this.state.hasfreetreatment +
-                                                "&inhouse=" +
-                                                obj.inhouse +
-                                                "&inclinic=" +
-                                                obj.inclinic +
-                                                "&isfreeconsultation=" +
-                                                obj.isfreeconsultation +
-                                                "&inclinicprice=" +
-                                                obj.inclinicprice +
-                                                "&inhouseprice=" +
-                                                obj.inhouseprice +
-                                                "&requiredgenderpreference=" +
-                                                obj.requiredgenderpreference +
-                                                obj.isfreeconsultation +
-                                                "&hasclickedfreeconsultation=true"
-                                            )
-                                          )
-                                        }
-                                        class="btn bg-transparent text-white services-card-footer-btn"
-                                      >
-                                        Free Consultation
-                                      </a>
-                                    </div>
-                                  ) : (
-                                    <div>
-                                      <a
-                                        href={
-                                          "/generic-booking/?" +
-                                          btoa(
-                                            encodeURIComponent(
-                                              "serviceType=isgeneric" +
-                                                "&categoryid=" +
-                                                this.state.categoryid +
-                                                "&servicetypename=" +
-                                                this.state.servicetypename +
-                                                "&servicetypeid=" +
-                                                this.state.servicetypeid +
-                                                "&hasfreetreatment=" +
-                                                this.state.hasfreetreatment +
-                                                "&inhouse=" +
-                                                obj.inhouse +
-                                                "&inclinic=" +
-                                                obj.inclinic +
-                                                "&hasquestions=" +
-                                                obj.hasquestions +
-                                                "&hassession=" +
-                                                obj.hassession +
-                                                "&inclinicprice=" +
-                                                obj.inclinicprice +
-                                                "&inhouseprice=" +
-                                                obj.inhouseprice +
-                                                "&requiredgenderpreference=" +
-                                                obj.requiredgenderpreference +
-                                                "&referralbonus=" +
-                                                this.state.referralbonus +
-                                                "&offer=" +
-                                                obj.offer +
-                                                "&isfreeconsultation=" +
-                                                obj.isfreeconsultation +
-                                                obj.isfreeconsultation +
-                                                "&hasclickedfreeconsultation=false"
-                                            )
-                                          )
-                                        }
-                                        class="btn bg-orange text-white services-card-footer-btn"
-                                      >
-                                        Book Now
-                                      </a>
-                                      <a
-                                        href={
-                                          "/generic-booking/?" +
-                                          btoa(
-                                            encodeURIComponent(
-                                              "serviceType=isgeneric" +
-                                                "&categoryid=" +
-                                                this.state.categoryid +
-                                                "&servicetypename=" +
-                                                this.state.servicetypename +
-                                                "&servicetypeid=" +
-                                                this.state.servicetypeid +
-                                                "&hasfreetreatment=" +
-                                                this.state.hasfreetreatment +
-                                                "&inhouse=" +
-                                                obj.inhouse +
-                                                "&inclinic=" +
-                                                obj.inclinic +
-                                                "&isfreeconsultation=" +
-                                                obj.isfreeconsultation +
-                                                "&inclinicprice=" +
-                                                obj.inclinicprice +
-                                                "&inhouseprice=" +
-                                                obj.inhouseprice +
-                                                "&requiredgenderpreference=" +
-                                                obj.requiredgenderpreference +
-                                                obj.isfreeconsultation +
-                                                "&hasclickedfreeconsultation=true"
-                                            )
-                                          )
-                                        }
-                                        class="btn bg-transparent text-white services-card-footer-btn"
-                                      >
-                                        Free Consultation
-                                      </a>
-                                    </div>
-                                  )
-                                ) : this.state.istraining == true ? (
-                                  <a
-                                    href={
-                                      "/select-course-date/?" +
-                                      btoa(
-                                        encodeURIComponent(
-                                          "serviceType=istraining" +
-                                            "&categoryid=" +
-                                            this.state.categoryid +
-                                            "&servicetypename=" +
-                                            this.state.servicetypename +
-                                            "&servicetypeid=" +
-                                            this.state.servicetypeid +
-                                            "&referralbonus=" +
-                                            this.state.referralbonus +
-                                            "&offer=" +
-                                            obj.offer +
-                                            "&hasclickedfreeconsultation=false"
-                                        )
-                                      )
-                                    }
-                                    class="btn bg-orange text-white services-card-footer-btn"
-                                  >
-                                    Book Now
-                                  </a>
-                                ) : this.state.hasarea == true ? (
-                                  <div>
-                                    <a
-                                      href={
-                                        "/service-areas/?" +
-                                        btoa(
-                                          encodeURIComponent(
-                                            "serviceType=hasarea" +
-                                              "&categoryid=" +
-                                              this.state.categoryid +
-                                              "&servicetypename=" +
-                                              this.state.servicetypename +
-                                              "&servicetypeid=" +
-                                              this.state.servicetypeid +
-                                              "&inhouse=" +
-                                              obj.inhouse +
-                                              "&inclinic=" +
-                                              obj.inclinic +
-                                              "&hasquestions=" +
-                                              obj.hasquestions +
-                                              "&hassession=" +
-                                              obj.hassession +
-                                              "&requiredgenderpreference=" +
-                                              obj.requiredgenderpreference +
-                                              "&referralbonus=" +
-                                              this.state.referralbonus +
-                                              "&offer=" +
-                                              obj.offer +
-                                              "&isfreeconsultation=" +
-                                              obj.isfreeconsultation +
-                                              "&hasclickedfreeconsultation=false"
-                                          )
-                                        )
-                                      }
-                                      class="btn bg-orange text-white services-card-footer-btn"
-                                    >
-                                      Book Now
-                                    </a>
-                                    <a
-                                      href={
-                                        "/service-areas/?" +
-                                        btoa(
-                                          encodeURIComponent(
-                                            "serviceType=hasarea" +
-                                              "&categoryid=" +
-                                              this.state.categoryid +
-                                              "&servicetypename=" +
-                                              this.state.servicetypename +
-                                              "&servicetypeid=" +
-                                              this.state.servicetypeid +
-                                              "&isfreeconsultation=" +
-                                              obj.isfreeconsultation +
-                                              "&inhouse=" +
-                                              obj.inhouse +
-                                              "&inclinic=" +
-                                              obj.inclinic +
-                                              "&requiredgenderpreference=" +
-                                              obj.requiredgenderpreference +
-                                              "&hasclickedfreeconsultation=true"
-                                          )
-                                        )
-                                      }
-                                      class="btn bg-transparent text-white services-card-footer-btn"
-                                    >
-                                      {" "}
-                                      Free Consultation
-                                    </a>
-                                  </div>
-                                ) : (
-                                  ""
-                                )
-                              ) : this.state.hasduration == true ? (
-                                <a
-                                  href={
-                                    "/service-durations/?" +
-                                    btoa(
-                                      encodeURIComponent(
-                                        "serviceType=hasduration" +
-                                          "&categoryid=" +
-                                          this.state.categoryid +
-                                          "&servicetypename=" +
-                                          this.state.servicetypename +
-                                          "&servicetypeid=" +
-                                          this.state.servicetypeid +
-                                          "&inhouse=" +
-                                          obj.inhouse +
-                                          "&inclinic=" +
-                                          obj.inclinic +
-                                          "&hasquestions=" +
-                                          obj.hasquestions +
-                                          "&hassession=" +
-                                          obj.hassession +
-                                          "&requiredgenderpreference=" +
-                                          obj.requiredgenderpreference +
-                                          "&referralbonus=" +
-                                          this.state.referralbonus +
-                                          "&offer=" +
-                                          obj.offer +
-                                          "&isfreeconsultation=" +
-                                          obj.isfreeconsultation +
-                                          "&hasclickedfreeconsultation=false"
-                                      )
-                                    )
-                                  }
-                                  class="btn bg-orange text-white services-card-footer-btn"
-                                >
-                                  Book Now
-                                </a>
-                              ) : this.state.isgeneric == true ? (
-                                <a
-                                  href={
-                                    "/generic-booking/?" +
-                                    btoa(
-                                      encodeURIComponent(
-                                        "serviceType=isgeneric" +
-                                          "&categoryid=" +
-                                          this.state.categoryid +
-                                          "&servicetypename=" +
-                                          this.state.servicetypename +
-                                          "&servicetypeid=" +
-                                          this.state.servicetypeid +
-                                          "&hasfreetreatment=" +
-                                          this.state.hasfreetreatment +
-                                          "&inhouse=" +
-                                          obj.inhouse +
-                                          "&inclinic=" +
-                                          obj.inclinic +
-                                          "&hasquestions=" +
-                                          obj.hasquestions +
-                                          "&hassession=" +
-                                          obj.hassession +
-                                          "&inclinicprice=" +
-                                          obj.inclinicprice +
-                                          "&inhouseprice=" +
-                                          obj.inhouseprice +
-                                          "&requiredgenderpreference=" +
-                                          obj.requiredgenderpreference +
-                                          "&referralbonus=" +
-                                          this.state.referralbonus +
-                                          "&offer=" +
-                                          obj.offer +
-                                          "&isfreeconsultation=" +
-                                          obj.isfreeconsultation
-                                      )
-                                    )
-                                  }
-                                  class="btn bg-orange text-white services-card-footer-btn"
-                                >
-                                  Book Now 5555555
-                                </a>
-                              ) : this.state.istraining == true ? (
-                                <a
-                                  href={
-                                    "/select-course-date/?" +
-                                    btoa(
-                                      encodeURIComponent(
-                                        "serviceType=istraining" +
-                                          "&categoryid=" +
-                                          this.state.categoryid +
-                                          "&servicetypename=" +
-                                          this.state.servicetypename +
-                                          "&servicetypeid=" +
-                                          this.state.servicetypeid +
-                                          "&requiredgenderpreference=" +
-                                          obj.requiredgenderpreference +
-                                          "&referralbonus=" +
-                                          this.state.referralbonus +
-                                          "&offer=" +
-                                          obj.offer
-                                      )
-                                    )
-                                  }
-                                  class="btn bg-orange text-white services-card-footer-btn"
-                                >
-                                  Book Now
-                                </a>
-                              ) : this.state.hasarea == true ? (
-                                this.state.hassubtypeArea == true ? (
-                                  <a
-                                    href={
-                                      "/service-areas-subtype/?" +
-                                      btoa(
-                                        encodeURIComponent(
-                                          "serviceType=hasarea" +
-                                            "&categoryid=" +
-                                            this.state.categoryid +
-                                            "&servicetypename=" +
-                                            this.state.servicetypename +
-                                            "&servicetypeid=" +
-                                            this.state.servicetypeid +
-                                            "&inhouse=" +
-                                            obj.inhouse +
-                                            "&inclinic=" +
-                                            obj.inclinic +
-                                            "&hasquestions=" +
-                                            obj.hasquestions +
-                                            "&hassession=" +
-                                            obj.hassession +
-                                            "&requiredgenderpreference=" +
-                                            obj.requiredgenderpreference +
-                                            "&referralbonus=" +
-                                            this.state.referralbonus +
-                                            "&offer=" +
-                                            obj.offer +
-                                            "&isfreeconsultation=" +
-                                            obj.isfreeconsultation
-                                        )
-                                      )
-                                    }
-                                    class="btn bg-orange text-white services-card-footer-btn"
-                                  >
-                                    Book Now
-                                  </a>
-                                ) : (
-                                  ""
-                                )
-                              ) : (
-                                ""
-                              )}
-                            </div>
-                            <form
-                              onSubmit={this.handleSubmit.bind(this)}
-                              className="no-mobile"
-                            >
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="serviceDetail section-padding ">
+                  <div className="overlay"></div>
+                  <div className="services-wrapper serviceSingleBottom bg-black pt-5 pb-5">
+                    <div className="container">
+                      <div className="row">
+                        <div className="col-md-12">
+                          <div className="bookNowBottom text-center">
+                            {getButtons}
+                          </div>
+                          <div className="yes-mobile text-white">
+                            <form onSubmit={this.handleSubmit.bind(this)}>
                               <div className="text-center ">
                                 <button
                                   type="submit"
@@ -1321,617 +1191,49 @@ export class ServiceSingle extends Component {
                               </div>
                             </form>
                           </div>
-                          <div className="btmImages no-mobile">
-                            <a
-                              href="https://play.google.com/store/apps/details?id=com.findanexpert"
-                              target="_blank"
-                            >
-                              <img
-                                src={App.StaticImagesUrl + "googleStore.png"}
-                                alt=""
-                              />
-                            </a>
-                            <a
-                              href="https://apps.apple.com/us/app/find-an-expert/id1468090965?ls=1"
-                              target="_blank"
-                            >
-                              <img
-                                src={App.StaticImagesUrl + "appleStore.png"}
-                                alt=""
-                              />
-                            </a>
-                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </section>
+                </section>
 
-              <section className="serviceDetail section-padding p-0">
-                <div className="services-wrapper">
-                  <div className="container">
-                    <div className="row pb-4">
-                      <div className="col-md-12">
-                        <div className="service-decription">
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: obj.description,
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section className="serviceDetail section-padding ">
-                <div className="overlay"></div>
-                <div className="services-wrapper serviceSingleBottom bg-black pt-5 pb-5">
-                  <div className="container">
-                    <div className="row">
-                      <div className="col-md-12">
-                        <div className="bookNowBottom text-center">
-                          {localStorage.getItem("isprofilecompleted") ==
-                          "false" ? (
-                            <button
-                              class="btn bg-orange text-white services-card-footer-btn"
-                              onClick={this.getNotification}
-                            >
-                              Book Now
-                            </button>
-                          ) : obj.isfreeconsultation == true ? (
-                            this.state.hasduration == true ? (
-                              <div>
-                                <a
-                                  href={
-                                    "/service-durations/?" +
-                                    btoa(
-                                      encodeURIComponent(
-                                        "serviceType=hasduration" +
-                                          "&categoryid=" +
-                                          this.state.categoryid +
-                                          "&servicetypename=" +
-                                          this.state.servicetypename +
-                                          "&servicetypeid=" +
-                                          this.state.servicetypeid +
-                                          "&inhouse=" +
-                                          obj.inhouse +
-                                          "&inclinic=" +
-                                          obj.inclinic +
-                                          "&hasquestions=" +
-                                          obj.hasquestions +
-                                          "&hassession=" +
-                                          obj.hassession +
-                                          "&requiredgenderpreference=" +
-                                          obj.requiredgenderpreference +
-                                          "&referralbonus=" +
-                                          this.state.referralbonus +
-                                          "&offer=" +
-                                          obj.offer +
-                                          "&isfreeconsultation=" +
-                                          obj.isfreeconsultation +
-                                          "&hasclickedfreeconsultation=false"
-                                      )
-                                    )
-                                  }
-                                  class="btn bg-orange text-white services-card-footer-btn"
-                                >
-                                  Book Now
-                                </a>
-                                <a
-                                  href={
-                                    "/service-durations/?" +
-                                    btoa(
-                                      encodeURIComponent(
-                                        "serviceType=hasduration" +
-                                          "&categoryid=" +
-                                          this.state.categoryid +
-                                          "&servicetypename=" +
-                                          this.state.servicetypename +
-                                          "&servicetypeid=" +
-                                          this.state.servicetypeid +
-                                          "&inhouse=" +
-                                          obj.inhouse +
-                                          "&inclinic=" +
-                                          obj.inclinic +
-                                          "&isfreeconsultation=" +
-                                          obj.isfreeconsultation +
-                                          "&requiredgenderpreference=" +
-                                          obj.requiredgenderpreference +
-                                          "&hasclickedfreeconsultation=true"
-                                      )
-                                    )
-                                  }
-                                  class="btn bg-transparent text-white services-card-footer-btn"
-                                >
-                                  Free Consultation
-                                </a>
-                              </div>
-                            ) : this.state.isgeneric == true ? (
-                              <div>
-                                <a
-                                  href={
-                                    "/generic-booking/?" +
-                                    btoa(
-                                      encodeURIComponent(
-                                        "serviceType=isgeneric" +
-                                          "&categoryid=" +
-                                          this.state.categoryid +
-                                          "&servicetypename=" +
-                                          this.state.servicetypename +
-                                          "&servicetypeid=" +
-                                          this.state.servicetypeid +
-                                          "&hasfreetreatment=" +
-                                          this.state.hasfreetreatment +
-                                          "&inhouse=" +
-                                          obj.inhouse +
-                                          "&inclinic=" +
-                                          obj.inclinic +
-                                          "&hasquestions=" +
-                                          obj.hasquestions +
-                                          "&hassession=" +
-                                          obj.hassession +
-                                          "&inclinicprice=" +
-                                          obj.inclinicprice +
-                                          "&inhouseprice=" +
-                                          obj.inhouseprice +
-                                          "&requiredgenderpreference=" +
-                                          obj.requiredgenderpreference +
-                                          "&referralbonus=" +
-                                          this.state.referralbonus +
-                                          "&offer=" +
-                                          obj.offer +
-                                          "&isfreeconsultation=" +
-                                          obj.isfreeconsultation +
-                                          "&hasclickedfreeconsultation=false"
-                                      )
-                                    )
-                                  }
-                                  class="btn bg-orange text-white services-card-footer-btn"
-                                >
-                                  Book Now lllllllllllllllll
-                                </a>
-                                <a
-                                  href={
-                                    "/generic-booking/?" +
-                                    btoa(
-                                      encodeURIComponent(
-                                        "serviceType=isgeneric" +
-                                          "&categoryid=" +
-                                          this.state.categoryid +
-                                          "&servicetypename=" +
-                                          this.state.servicetypename +
-                                          "&servicetypeid=" +
-                                          this.state.servicetypeid +
-                                          "&hasfreetreatment=" +
-                                          this.state.hasfreetreatment +
-                                          "&inhouse=" +
-                                          obj.inhouse +
-                                          "&inclinic=" +
-                                          obj.inclinic +
-                                          "&isfreeconsultation=" +
-                                          obj.isfreeconsultation +
-                                          "&inclinicprice=" +
-                                          obj.inclinicprice +
-                                          "&inhouseprice=" +
-                                          obj.inhouseprice +
-                                          "&requiredgenderpreference=" +
-                                          obj.requiredgenderpreference +
-                                          "&hasclickedfreeconsultation=true"
-                                      )
-                                    )
-                                  }
-                                  class="btn bg-transparent text-white services-card-footer-btn"
-                                >
-                                  Free Consultation
-                                </a>
-                              </div>
-                            ) : this.state.istraining == true ? (
-                              <a
-                                href={
-                                  "/select-course-date/?" +
-                                  btoa(
-                                    encodeURIComponent(
-                                      "serviceType=istraining" +
-                                        "&categoryid=" +
-                                        this.state.categoryid +
-                                        "&servicetypename=" +
-                                        this.state.servicetypename +
-                                        "&servicetypeid=" +
-                                        this.state.servicetypeid +
-                                        "&requiredgenderpreference=" +
-                                        obj.requiredgenderpreference +
-                                        "&referralbonus=" +
-                                        this.state.referralbonus +
-                                        "&offer=" +
-                                        obj.offer +
-                                        "&isfreeconsultation=" +
-                                        obj.isfreeconsultation
-                                    )
-                                  )
-                                }
-                                class="btn bg-orange text-white services-card-footer-btn"
-                              >
-                                Book Now
-                              </a>
-                            ) : this.state.hasarea == true ? (
-                              this.state.hassubtypeArea == true ? (
-                                <div>
-                                  <a
-                                    href={
-                                      "/service-areas-subtype/?" +
-                                      btoa(
-                                        encodeURIComponent(
-                                          "serviceType=hasarea" +
-                                            "&categoryid=" +
-                                            this.state.categoryid +
-                                            "&servicetypename=" +
-                                            this.state.servicetypename +
-                                            "&servicetypeid=" +
-                                            this.state.servicetypeid +
-                                            "&inhouse=" +
-                                            obj.inhouse +
-                                            "&inclinic=" +
-                                            obj.inclinic +
-                                            "&hasquestions=" +
-                                            obj.hasquestions +
-                                            "&hassession=" +
-                                            obj.hassession +
-                                            "&requiredgenderpreference=" +
-                                            obj.requiredgenderpreference +
-                                            "&referralbonus=" +
-                                            this.state.referralbonus +
-                                            "&offer=" +
-                                            obj.offer +
-                                            "&isfreeconsultation=" +
-                                            obj.isfreeconsultation
-                                        )
-                                      )
-                                    }
-                                    class="btn bg-orange text-white services-card-footer-btn"
-                                  >
-                                    Book Now
-                                  </a>
-                                  <a
-                                    href={
-                                      "/service-areas-subtype/?" +
-                                      btoa(
-                                        encodeURIComponent(
-                                          "serviceType=hasarea" +
-                                            "&categoryid=" +
-                                            this.state.categoryid +
-                                            "&servicetypename=" +
-                                            this.state.servicetypename +
-                                            "&servicetypeid=" +
-                                            this.state.servicetypeid +
-                                            "&isfreeconsultation=" +
-                                            obj.isfreeconsultation +
-                                            "&inhouse=" +
-                                            obj.inhouse +
-                                            "&inclinic=" +
-                                            obj.inclinic +
-                                            "&requiredgenderpreference=" +
-                                            obj.requiredgenderpreference +
-                                            "&hasclickedfreeconsultation=true"
-                                        )
-                                      )
-                                    }
-                                    class="btn bg-transparent text-white services-card-footer-btn"
-                                  >
-                                    Free Consultation
-                                  </a>
-                                </div>
-                              ) : (
-                                <div>
-                                  <a
-                                    href={
-                                      "/service-areas/?" +
-                                      btoa(
-                                        encodeURIComponent(
-                                          "serviceType=hasarea" +
-                                            "&categoryid=" +
-                                            this.state.categoryid +
-                                            "&servicetypename=" +
-                                            this.state.servicetypename +
-                                            "&servicetypeid=" +
-                                            this.state.servicetypeid +
-                                            "&inhouse=" +
-                                            obj.inhouse +
-                                            "&inclinic=" +
-                                            obj.inclinic +
-                                            "&hasquestions=" +
-                                            obj.hasquestions +
-                                            "&hassession=" +
-                                            obj.hassession +
-                                            "&requiredgenderpreference=" +
-                                            obj.requiredgenderpreference +
-                                            "&referralbonus=" +
-                                            this.state.referralbonus +
-                                            "&offer=" +
-                                            obj.offer +
-                                            "&isfreeconsultation=" +
-                                            obj.isfreeconsultation
-                                        )
-                                      )
-                                    }
-                                    class="btn bg-orange text-white services-card-footer-btn"
-                                  >
-                                    Book Now
-                                  </a>
-                                  <a
-                                    href={
-                                      "/service-areas/?" +
-                                      btoa(
-                                        encodeURIComponent(
-                                          "serviceType=hasarea" +
-                                            "&categoryid=" +
-                                            this.state.categoryid +
-                                            "&servicetypename=" +
-                                            this.state.servicetypename +
-                                            "&servicetypeid=" +
-                                            this.state.servicetypeid +
-                                            "&isfreeconsultation=" +
-                                            obj.isfreeconsultation +
-                                            "&inhouse=" +
-                                            obj.inhouse +
-                                            "&inclinic=" +
-                                            obj.inclinic +
-                                            "&requiredgenderpreference=" +
-                                            obj.requiredgenderpreference +
-                                            "&hasclickedfreeconsultation=true"
-                                        )
-                                      )
-                                    }
-                                    class="btn bg-transparent text-white services-card-footer-btn"
-                                  >
-                                    Free Consultation
-                                  </a>
-                                </div>
-                              )
-                            ) : (
-                              ""
-                            )
-                          ) : this.state.hasduration == true ? (
-                            <a
-                              href={
-                                "/service-durations/?" +
-                                btoa(
-                                  encodeURIComponent(
-                                    "serviceType=hasduration" +
-                                      "&categoryid=" +
-                                      this.state.categoryid +
-                                      "&servicetypename=" +
-                                      this.state.servicetypename +
-                                      "&servicetypeid=" +
-                                      this.state.servicetypeid +
-                                      "&inhouse=" +
-                                      obj.inhouse +
-                                      "&inclinic=" +
-                                      obj.inclinic +
-                                      "&hasquestions=" +
-                                      obj.hasquestions +
-                                      "&hassession=" +
-                                      obj.hassession +
-                                      "&requiredgenderpreference=" +
-                                      obj.requiredgenderpreference +
-                                      "&referralbonus=" +
-                                      this.state.referralbonus +
-                                      "&offer=" +
-                                      obj.offer +
-                                      "&isfreeconsultation=" +
-                                      obj.isfreeconsultation +
-                                      "&hasclickedfreeconsultation=false"
-                                  )
-                                )
-                              }
-                              class="btn bg-orange text-white services-card-footer-btn"
-                            >
-                              Book Now
-                            </a>
-                          ) : this.state.isgeneric == true ? (
-                            <a
-                              href={
-                                "/generic-booking/?" +
-                                btoa(
-                                  encodeURIComponent(
-                                    "serviceType=isgeneric" +
-                                      "&categoryid=" +
-                                      this.state.categoryid +
-                                      "&servicetypename=" +
-                                      this.state.servicetypename +
-                                      "&servicetypeid=" +
-                                      this.state.servicetypeid +
-                                      "&hasfreetreatment=" +
-                                      this.state.hasfreetreatment +
-                                      "&inhouse=" +
-                                      obj.inhouse +
-                                      "&inclinic=" +
-                                      obj.inclinic +
-                                      "&hasquestions=" +
-                                      obj.hasquestions +
-                                      "&hassession=" +
-                                      obj.hassession +
-                                      "&inclinicprice=" +
-                                      obj.inclinicprice +
-                                      "&inhouseprice=" +
-                                      obj.inhouseprice +
-                                      "&requiredgenderpreference=" +
-                                      obj.requiredgenderpreference +
-                                      "&referralbonus=" +
-                                      this.state.referralbonus +
-                                      "&offer=" +
-                                      obj.offer +
-                                      "&isfreeconsultation=" +
-                                      obj.isfreeconsultation
-                                  )
-                                )
-                              }
-                              class="btn bg-orange text-white services-card-footer-btn"
-                            >
-                              Book Now iiiiiii
-                            </a>
-                          ) : this.state.istraining == true ? (
-                            <a
-                              href={
-                                "/select-course-date/?" +
-                                btoa(
-                                  encodeURIComponent(
-                                    "serviceType=istraining" +
-                                      "&categoryid=" +
-                                      this.state.categoryid +
-                                      "&servicetypename=" +
-                                      this.state.servicetypename +
-                                      "&servicetypeid=" +
-                                      this.state.servicetypeid +
-                                      "&requiredgenderpreference=" +
-                                      obj.requiredgenderpreference +
-                                      "&referralbonus=" +
-                                      this.state.referralbonus +
-                                      "&offer=" +
-                                      obj.offer
-                                  )
-                                )
-                              }
-                              class="btn bg-orange text-white services-card-footer-btn"
-                            >
-                              Book Now
-                            </a>
-                          ) : this.state.hasarea == true ? (
-                            this.state.hassubtypeArea == true ? (
-                              <a
-                                href={
-                                  "/service-areas-subtype/?" +
-                                  btoa(
-                                    encodeURIComponent(
-                                      "serviceType=hasarea" +
-                                        "&categoryid=" +
-                                        this.state.categoryid +
-                                        "&servicetypename=" +
-                                        this.state.servicetypename +
-                                        "&servicetypeid=" +
-                                        this.state.servicetypeid +
-                                        "&inhouse=" +
-                                        obj.inhouse +
-                                        "&inclinic=" +
-                                        obj.inclinic +
-                                        "&hasquestions=" +
-                                        obj.hasquestions +
-                                        "&hassession=" +
-                                        obj.hassession +
-                                        "&requiredgenderpreference=" +
-                                        obj.requiredgenderpreference +
-                                        "&referralbonus=" +
-                                        this.state.referralbonus +
-                                        "&offer=" +
-                                        obj.offer +
-                                        "&isfreeconsultation=" +
-                                        obj.isfreeconsultation
-                                    )
-                                  )
-                                }
-                                class="btn bg-orange text-white services-card-footer-btn"
-                              >
-                                Book Now
-                              </a>
-                            ) : (
-                              <a
-                                href={
-                                  "/service-areas/?" +
-                                  btoa(
-                                    encodeURIComponent(
-                                      "serviceType=hasarea" +
-                                        "&categoryid=" +
-                                        this.state.categoryid +
-                                        "&servicetypename=" +
-                                        this.state.servicetypename +
-                                        "&servicetypeid=" +
-                                        this.state.servicetypeid +
-                                        "&inhouse=" +
-                                        obj.inhouse +
-                                        "&inclinic=" +
-                                        obj.inclinic +
-                                        "&hasquestions=" +
-                                        obj.hasquestions +
-                                        "&hassession=" +
-                                        obj.hassession +
-                                        "&requiredgenderpreference=" +
-                                        obj.requiredgenderpreference +
-                                        "&referralbonus=" +
-                                        this.state.referralbonus +
-                                        "&offer=" +
-                                        obj.offer +
-                                        "&isfreeconsultation=" +
-                                        obj.isfreeconsultation
-                                    )
-                                  )
-                                }
-                                class="btn bg-orange text-white services-card-footer-btn"
-                              >
-                                Book Now
-                              </a>
-                            )
-                          ) : (
-                            ""
-                          )}
-                        </div>
-                        <div className="yes-mobile text-white">
-                          <form onSubmit={this.handleSubmit.bind(this)}>
-                            <div className="text-center ">
-                              <button
-                                type="submit"
-                                className="btn bg-transparent text-white pr-0"
-                                id={obj.serviceid}
-                                onClick={this.getServiceID}
-                              >
-                                <i class="fas fa-heart"></i> Add to watchlist
-                              </button>
+                <div
+                  class={"modal fade " + this.state.showModal}
+                  id="referralModal"
+                  tabindex="-1"
+                  role="dialog"
+                  aria-labelledby="logoutModal"
+                  aria-hidden="true"
+                >
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-body">
+                        <div className="row">
+                          <div className="col-md-12 d-flex">
+                            <div>
+                              <img
+                                src={headerporfileicon}
+                                style={iconstyle}
+                                className="change-to-white"
+                              />
                             </div>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <div
-                class={"modal fade " + this.state.showModal}
-                id="referralModal"
-                tabindex="-1"
-                role="dialog"
-                aria-labelledby="logoutModal"
-                aria-hidden="true"
-              >
-                <div class="modal-dialog" role="document">
-                  <div class="modal-content">
-                    <div class="modal-body">
-                      <div className="row">
-                        <div className="col-md-12 d-flex">
-                          <div>
-                            <img
-                              src={headerporfileicon}
-                              style={iconstyle}
-                              className="change-to-white"
-                            />
+                            <h3 className="p-0 m-0 pl-3 text-dark font-weight-bold">
+                              Expert
+                            </h3>
                           </div>
-                          <h3 className="p-0 m-0 pl-3 text-dark font-weight-bold">
-                            Expert
-                          </h3>
-                        </div>
-                        <div className="col-md-12 text-center fs-18 p-5">
-                          {this.state.modalMessage}
-                        </div>
-                        <div className="col-md-12 text-right">
-                          <div className="w-100">
-                            <a
-                              id="okBtn"
-                              class="btn bg-black text-white float-right ml-3"
-                              onClick={this.handleModal.bind(this)}
-                            >
-                              OK
-                            </a>
+                          <div className="col-md-12 text-center fs-18 p-5">
+                            {this.state.modalMessage}
+                          </div>
+                          <div className="col-md-12 text-right">
+                            <div className="w-100">
+                              <a
+                                id="okBtn"
+                                class="btn bg-black text-white float-right ml-3"
+                                onClick={this.handleModal.bind(this)}
+                              >
+                                OK
+                              </a>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1939,96 +1241,8 @@ export class ServiceSingle extends Component {
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-
-          <section class="pb-4" id="st_app_links_media">
-            <div class="services-wrapper">
-              <div class="container-fluid">
-                <div class="row">
-                  <div class="col-md-2 info-col pr-0 noMobile">
-                    <div class="info-box section-bg-light" id="col_1">
-                      <img
-                        className="img-responsive m-auto"
-                        src={App.StaticImagesUrl + "info_1.png"}
-                        alt="expert-mobile"
-                      />
-                    </div>
-                  </div>
-
-                  <div class="col-md-6 info-col noMobile">
-                    <div class="info-box section-bg-light" id="col_2">
-                      <p class="lead text">
-                        Want all the <strong>Services </strong>
-                        at your fingertips ? <strong>Download</strong> the
-                        Expert app <strong>Now</strong>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div class="col-md-4 info-col pl-0">
-                    <div class="info-box section-bg-light no-mobile" id="col_3">
-                      <div className="content">
-                        <a
-                          href="https://apps.apple.com/us/app/find-an-expert/id1468090965?ls=1"
-                          target="_blank"
-                        >
-                          <img
-                            className="appleImage"
-                            src={App.StaticImagesUrl + "appleStore.png"}
-                            alt=""
-                            width="100%"
-                          />
-                        </a>
-                        <a
-                          href="https://play.google.com/store/apps/details?id=com.findanexpert"
-                          target="_blank"
-                        >
-                          <img
-                            className="gooleImage"
-                            src={App.StaticImagesUrl + "googleStore.png"}
-                            alt=""
-                            width="100%"
-                          />
-                        </a>
-                      </div>
-                    </div>
-
-                    <div
-                      class="info-box serviceSingle section-bg-light yes-mobile"
-                      id="col_3"
-                    >
-                      <h3>Download the expert app now</h3>
-                      <div>
-                        <a
-                          href="https://apps.apple.com/us/app/find-an-expert/id1468090965?ls=1"
-                          target="_blank"
-                        >
-                          <img
-                            className="appleImage"
-                            src={App.StaticImagesUrl + "appleStore.png"}
-                            alt=""
-                            width="100%"
-                          />
-                        </a>
-                        <a
-                          href="https://play.google.com/store/apps/details?id=com.findanexpert"
-                          target="_blank"
-                        >
-                          <img
-                            className="gooleImage"
-                            src={App.StaticImagesUrl + "googleStore.png"}
-                            alt=""
-                            width="100%"
-                          />
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
+            );
+          })}
         </div>
       );
     } else {
@@ -2067,21 +1281,19 @@ export class ServiceSingle extends Component {
                             <div class="ribbon ribbonTopLeft">
                               <span>{obj.offerdiscount}% OFF</span>
                             </div>
-                          ) : (
-                            ""
-                          )}
+                          ) : null}
                           {this.state.imagepath != "" ? (
                             <img
                               className="img-fluid rounded"
                               src={this.state.imagepath}
                               alt={this.state.servicetypename}
-                            ></img>
+                            />
                           ) : (
                             <img
                               className="img-fluid rounded"
                               src={placeholderLarge}
                               alt={this.state.servicetypename}
-                            ></img>
+                            />
                           )}
                         </div>
                       </div>
@@ -2176,11 +1388,7 @@ export class ServiceSingle extends Component {
                     <div className="row pb-4">
                       <div className="col-md-12">
                         <div className="service-decription">
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: obj.description,
-                            }}
-                          />
+                          <div>{HTMLReactParser(obj.description)}</div>
                         </div>
                       </div>
                     </div>
@@ -2223,99 +1431,16 @@ export class ServiceSingle extends Component {
               </section>
             </div>
           ))}
-
-          <section class="pb-4" id="st_app_links_media">
-            <div class="services-wrapper">
-              <div class="container-fluid">
-                <div class="row">
-                  <div class="col-md-2 info-col pr-0 noMobile">
-                    <div class="info-box section-bg-light" id="col_1">
-                      <img
-                        className="img-responsive m-auto"
-                        src={App.StaticImagesUrl + "info_1.png"}
-                        alt="expert-mobile"
-                      />
-                    </div>
-                  </div>
-
-                  <div class="col-md-6 info-col noMobile">
-                    <div class="info-box section-bg-light" id="col_2">
-                      <p class="lead text">
-                        Want all the <strong>Services </strong>
-                        at your fingertips ? <strong>Download</strong> the
-                        Expert app <strong>Now</strong>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div class="col-md-4 info-col pl-0">
-                    <div class="info-box section-bg-light no-mobile" id="col_3">
-                      <div className="content">
-                        <a
-                          href="https://apps.apple.com/us/app/find-an-expert/id1468090965?ls=1"
-                          target="_blank"
-                        >
-                          <img
-                            className="appleImage"
-                            src={App.StaticImagesUrl + "appleStore.png"}
-                            alt=""
-                            width="100%"
-                          />
-                        </a>
-                        <a
-                          href="https://play.google.com/store/apps/details?id=com.findanexpert"
-                          target="_blank"
-                        >
-                          <img
-                            className="gooleImage"
-                            src={App.StaticImagesUrl + "googleStore.png"}
-                            alt=""
-                            width="100%"
-                          />
-                        </a>
-                      </div>
-                    </div>
-
-                    <div
-                      class="info-box serviceSingle section-bg-light yes-mobile"
-                      id="col_3"
-                    >
-                      <h3>Download the expert app now</h3>
-                      <div>
-                        <a
-                          href="https://apps.apple.com/us/app/find-an-expert/id1468090965?ls=1"
-                          target="_blank"
-                        >
-                          <img
-                            className="appleImage"
-                            src={App.StaticImagesUrl + "appleStore.png"}
-                            alt=""
-                            width="100%"
-                          />
-                        </a>
-                        <a
-                          href="https://play.google.com/store/apps/details?id=com.findanexpert"
-                          target="_blank"
-                        >
-                          <img
-                            className="gooleImage"
-                            src={App.StaticImagesUrl + "googleStore.png"}
-                            alt=""
-                            width="100%"
-                          />
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
         </div>
       );
     }
 
-    return <div>{serviceContent}</div>;
+    return (
+      <div>
+        {serviceContent}
+        {appLinksMedia}
+      </div>
+    );
   }
 }
 
