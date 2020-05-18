@@ -705,7 +705,7 @@ export class ServiceSingle extends Component {
   }
 
   render() {
-    console.log("934809234809238490", this.state.hassubtypeArea);
+    console.log(this.state.hassubtypeGeneric);
     var metaTitle = this.state.serviceDetails.map((obj) => obj.metatitle);
     var metaDescription = this.state.serviceDetails.map(
       (obj) => obj.metadescription
@@ -897,7 +897,7 @@ export class ServiceSingle extends Component {
                                     </a>
                                   </div>
                                 ) : this.state.isgeneric == true ? (
-                                  this.state.hassubtypeGeneric == true ? (
+                                  this.state.hassubtypeGeneric == false ? (
                                     <div>
                                       <a
                                         href={
