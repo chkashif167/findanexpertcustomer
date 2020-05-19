@@ -2,8 +2,8 @@
 import App from "../../App";
 import toastr from "toastr";
 
-export class ServiceAreaBookingSubType extends Component {
-  displayName = ServiceAreaBookingSubType.name;
+export class ServiceDurationSubType extends Component {
+  displayName = ServiceDurationSubType.name;
 
   constructor(props) {
     super(props);
@@ -104,7 +104,7 @@ export class ServiceAreaBookingSubType extends Component {
         {this.state.subTypeList.map((itm, index) => (
           <a
             href={
-              "/service-areas/?" +
+              "/service-durations/?" +
               btoa(
                 encodeURIComponent(
                   "serviceType=isgeneric" +

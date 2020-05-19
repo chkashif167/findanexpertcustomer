@@ -97,8 +97,8 @@ export class GenericBookingSubType extends Component {
 
   render() {
     return (
-      <div>
-        {this.state.subTypeList.map((itm) => (
+      <div className="BookingSubTypeComp container">
+        {this.state.subTypeList.map((itm, index) => (
           <a
             href={
               "/generic-booking/?" +
@@ -111,6 +111,8 @@ export class GenericBookingSubType extends Component {
                     this.state.servicetypename +
                     "&servicetypeid=" +
                     this.state.servicetypeid +
+                    "&subtypeid=" +
+                    itm.subtypeid +
                     "&hasfreetreatment=" +
                     this.state.hasfreetreatment +
                     "&inhouse=" +
@@ -140,9 +142,17 @@ export class GenericBookingSubType extends Component {
               )
             }
           >
-            <h3> {itm.subtypename} </h3>
-            <img src={itm.imageurl} />
-            {itm.description}
+            <div className="img">
+              <img src={itm.imageurl} />
+            </div>
+            <div className="nameAndDesc">
+              <h3> {itm.subtypename} </h3>
+              <div className="description">{itm.description}</div>
+            </div>
+            <div className="price">
+              {" "}
+              £{itm.price} ===== {itm.subtypeid}
+            </div>
           </a>
         ))}
         <br />

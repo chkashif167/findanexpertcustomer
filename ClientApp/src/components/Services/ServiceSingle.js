@@ -77,70 +77,6 @@ export class ServiceSingle extends Component {
       hasSubTypeTraining: false,
       hasSubTypeDuration: false,
     };
-
-    //fetch(App.ApisBaseUrl + '/api/ServiceType/getservicetypedetail?servicetypename=' + serviceTypeName)
-    //    .then(response => {
-    //        if (response.status == 200) {
-    //            return response.json();
-    //        }
-    //        else {
-    //            window.location = '/';
-    //        }
-    //    })
-    //    .then(response => {
-    //        console.log(response);
-    //        const tempArr = this.state.serviceDetails;
-    //        tempArr.push(response);
-    //        this.setState({ serviceDetails: tempArr });
-
-    //        /*---Facebook open graph content---*/
-    //        var openGraphArray = [];
-    //        for (var i = 0; i < this.state.serviceDetails.length; i++) {
-    //            if (i == 0) {
-    //                openGraphArray.push(this.state.serviceDetails[i].fbopengraph_code);
-    //            }
-    //        }
-
-    //        this.setState({ openGraphTags: openGraphArray });
-    //        console.log(this.state.openGraphTags);
-
-    //        var openGraphArray2 = this.state.openGraphTags[0].split("<br/>");
-    //        var ogTitle = openGraphArray2[0];
-    //        this.setState({ ogTitle: ogTitle.split(':').pop() });
-    //        var ogType = openGraphArray2[1];
-    //        this.setState({ ogType: ogType.split(':').pop() });
-    //        var ogUrl = openGraphArray2[2];
-    //        this.setState({ ogUrl: ogUrl.split(':').pop() });
-    //        var ogImage = openGraphArray2[3];
-    //        this.setState({ ogImage: ogImage.split(':').pop() });
-    //        var ogDescription = openGraphArray2[4];
-    //        this.setState({ ogDescription: ogDescription.split(':').pop() });
-    //        var ogSiteName = openGraphArray2[5];
-    //        this.setState({ ogSiteName: ogSiteName.split(':').pop() });
-
-    //        /*---Twitter card content---*/
-    //        var twitterCardArray = [];
-    //        for (var i = 0; i < this.state.serviceDetails.length; i++) {
-    //            if (i == 0) {
-    //                twitterCardArray.push(this.state.serviceDetails[i].twittercard);
-    //            }
-    //        }
-
-    //        this.setState({ twitterCardsTags: openGraphArray });
-    //        var twitterCardArray2 = this.state.twitterCardsTags[0].split("<br/>");
-    //        var twCard = twitterCardArray2[0];
-    //        this.setState({ twCard: twCard.split(':').pop() });
-    //        var twSite = twitterCardArray2[1];
-    //        this.setState({ twSite: twSite.split(':').pop() });
-    //        var twCreator = twitterCardArray2[2];
-    //        this.setState({ twCreator: twCreator.split(':').pop() });
-    //        var twTitle = twitterCardArray2[3];
-    //        this.setState({ twTitle: twTitle.split(':').pop() });
-    //        var twDescription = twitterCardArray2[4];
-    //        this.setState({ twDescription: twDescription.split(':').pop() });
-    //        var twImage = twitterCardArray2[5];
-    //        this.setState({ twImage: twImage.split(':').pop() });
-    //    });
   }
 
   componentDidMount() {
@@ -214,16 +150,17 @@ export class ServiceSingle extends Component {
             this.setState({ imagepath: this.state.allServices[i].imagepath });
           }
         }
-
-        if (this.state.hasduration == true) {
-          this.hasduration();
-        } else if (this.state.isgeneric == true) {
-          this.isgeneric();
-        } else if (this.state.hasarea == true) {
-          this.hasarea();
-        } else if (this.state.istraining == true) {
-          this.istraining();
-        }
+        setTimeout(() => {
+          if (this.state.hasduration == true) {
+            this.hasduration();
+          } else if (this.state.isgeneric == true) {
+            this.isgeneric();
+          } else if (this.state.hasarea == true) {
+            this.hasarea();
+          } else if (this.state.istraining == true) {
+            this.istraining();
+          }
+        }, 0);
       });
   }
 
@@ -388,8 +325,8 @@ export class ServiceSingle extends Component {
           this.setState({ twDescription: twDescription.split(":").pop() });
           var twImage = twitterCardArray2[5];
           this.setState({ twImage: twImage.split(":").pop() });
-          this.setState({ hassubtypeGeneric: data.hassubtype });
         }
+        this.setState({ hassubtypeGeneric: data.hassubtype });
       });
 
     /*---Save incomplete booking---*/
@@ -744,14 +681,19 @@ export class ServiceSingle extends Component {
       hasSubTypeTraining,
       hasarea,
       hassubtypeArea,
+      hasSubTypeDuration,
     } = this.state;
     let url = null;
+    console.log("hasSubTypeDuration", hasSubTypeDuration);
+    console.log("hasduration==>", hasduration);
     if (isgeneric) {
       url = hassubtypeGeneric
         ? "/generic-booking-subtype/"
         : "/generic-booking/";
     } else if (hasduration) {
-      url = "/service-durations/";
+      url = hasSubTypeDuration
+        ? "/service-durations-subtype/"
+        : "/service-durations/";
     } else if (istraining) {
       url = hasSubTypeTraining
         ? "/select-course-date-subtype/"

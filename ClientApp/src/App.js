@@ -77,6 +77,7 @@ import { DurationDateTime } from "./components/Booking/DurationDateTime";
 import { DurationSummary } from "./components/Booking/DurationSummary";
 import { GenericGenderAddress } from "./components/Booking/GenericGenderAddress";
 import { GenericBookingSubType } from "./components/Booking/GenericBookingSubType";
+import { ServiceDurationSubType } from "./components/Booking/DurationBookingSubType";
 import { ServiceAreaBookingSubType } from "./components/Booking/ServiceAreaBookingSubType";
 import { GenericDateTime } from "./components/Booking/GenericDateTime";
 import { GenericSummary } from "./components/Booking/GenericSummary";
@@ -182,6 +183,11 @@ export default class App extends Component {
             <Route
               path="/generic-booking-subtype"
               component={GenericBookingSubType}
+            />
+
+            <Route
+              path="/service-durations-subtype"
+              component={ServiceDurationSubType}
             />
             <Route path="/generic-date-time" component={GenericDateTime} />
             <Route path="/generic-summary" component={GenericSummary} />
