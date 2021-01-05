@@ -14,7 +14,7 @@
     "@progress/kendo-theme-material": "^3.2.0",
     "@syncfusion/ej2-react-buttons": "^17.1.47",
     "@syncfusion/ej2-react-dropdowns": "^17.3.19",
-    "axios": "^0.19.1",
+    "axios": "^0.21.1",
     "bootstrap": "^3.3.7",
     "braintree-web-drop-in-react": "0.2.10",
     "date-fns": "^2.0.0-beta.5",
